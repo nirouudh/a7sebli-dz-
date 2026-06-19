@@ -132,18 +132,17 @@
     function calculateSemesterGPA() {
         const groupBoxes = document.querySelectorAll('.group-box');
         
-        let totalPointsCalculated = 0;
-        let totalCoefficientsCalculated = 0;
+        let totalPointsFromFilled = 0; 
+        let totalCoefficientsAll = 0;   
         
         let emptyExamsCount = 0;
         let targetRow = null;
 
-        // إخفاء المستشار مبدئياً لتحديث البيانات الجديدة
         const advisorBox = document.getElementById('advisorContainer');
         const advisorMsg = document.getElementById('advisorMessage');
-        advisorBox.style.display = "none";
+        advisorBox.style.display = "none"; 
 
-        // خطوة 1: مسح الشاشة وجمع البيانات الأساسية وفصل المادة الفارغة
+        // خطوة 1: جمع البيانات وفرز المواد
         groupBoxes.forEach(box => {
             const rows = box.querySelectorAll('tbody tr');
             rows.forEach(row => {
@@ -151,9 +150,11 @@
                 let examInput = row.querySelector('.exam').value.trim();
                 let tdInput = row.querySelector('.td-mark').value.trim();
 
+                totalCoefficientsAll += coeff; 
+
                 if (examInput === "") {
                     emptyExamsCount++;
-                    targetRow = row; // حفظ السطر الفارغ المستهدف
+                    targetRow = row; 
                 } else {
                     let exam = parseFloat(examInput) || 0;
                     let subjectAverage = exam;
@@ -161,76 +162,56 @@
                         let td = parseFloat(tdInput) || 0;
                         subjectAverage = (exam * 0.6) + (td * 0.4);
                     }
-                    totalPointsCalculated += (subjectAverage * coeff);
-                    totalCoefficientsCalculated += coeff;
+                    totalPointsFromFilled += (subjectAverage * coeff);
                 }
             });
         });
 
-        // حساب المعدل الإجمالي الفعلي (باعتبار علامة المادة الفارغة صفر حالياً لكي لا يفسد الحساب)
-        let totalPointsForDisplay = totalPointsCalculated;
-        let totalCoefficientsForDisplay = totalCoefficientsCalculated;
-
+        // حساب المجموع الإجمالي الفعلي لعرضه على الشاشة (باعتبار الامتحان الفارغ = 0 حالياً)
+        let totalPointsForDisplay = totalPointsFromFilled;
         if (emptyExamsCount === 1 && targetRow !== null) {
             let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
             let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
-            totalCoefficientsForDisplay += targetCoeff;
-            
             if (targetTdInput !== "") {
                 let targetTd = parseFloat(targetTdInput) || 0;
-                totalPointsForDisplay += ((targetTd * 0.4) * targetCoeff); // إضافة نقاط الـ TD الحالية للمجموع الفعلي
+                totalPointsForDisplay += ((targetTd * 0.4) * targetCoeff); 
             }
-        } else if (emptyExamsCount > 1) {
-            // لو كان هناك أكثر من خانة فارغة، نحسب معاملاتها أيضاً كأصفار
-            groupBoxes.forEach(box => {
-                const rows = box.querySelectorAll('tbody tr');
-                rows.forEach(row => {
-                    if (row.querySelector('.exam').value.trim() === "") {
-                        totalCoefficientsForDisplay += (parseFloat(row.querySelector('.coeff').value) || 1);
-                        let tdInput = row.querySelector('.td-mark').value.trim();
-                        if (tdInput !== "") {
-                            totalPointsForDisplay += ((parseFloat(tdInput) || 0) * 0.4 * (parseFloat(row.querySelector('.coeff').value) || 1));
-                        }
-                    }
-                });
-            });
         }
 
-        let finalGPA = totalCoefficientsForDisplay > 0 ? (totalPointsForDisplay / totalCoefficientsForDisplay) : 0;
+        let finalGPA = totalCoefficientsAll > 0 ? (totalPointsForDisplay / totalCoefficientsAll) : 0;
 
-        // خطوة 2: تشغيل منطق المستشار الذكي إذا كان المعدل الإجمالي أقل من 10 وهناك خانة فارغة واحدة بالضبط
-        if (finalGPA < 10 && emptyExamsCount === 1 && targetRow !== null) {
+        // خطوة 2: تشغيل المستشار فوراً بمجرد وجود مادة واحدة فارغة (مهما كان عدد المواد الأخرى)
+        if (emptyExamsCount === 1 && targetRow !== null) {
             let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
             let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
             let targetSubName = targetRow.querySelector('.sub-name').value.trim() || "المادة المتبقية";
 
-            let requiredTotalPoints = 10 * totalCoefficientsForDisplay;
-            let requiredSubjectPoints = requiredTotalPoints - totalPointsCalculated;
-            let requiredSubjectAverage = requiredSubjectPoints / targetCoeff;
-
+            let requiredTotalPoints = 10 * totalCoefficientsAll;
+            let pointsNeededFromTargetSubject = requiredTotalPoints - totalPointsFromFilled;
+            
             let requiredExamMark = 0;
 
             if (targetTdInput === "") {
-                requiredExamMark = requiredSubjectAverage;
+                requiredExamMark = pointsNeededFromTargetSubject / targetCoeff;
             } else {
                 let targetTd = parseFloat(targetTdInput) || 0;
-                requiredExamMark = (requiredSubjectAverage - (targetTd * 0.4)) / 0.6;
+                let pointsNeededFromExamOnly = pointsNeededFromTargetSubject - ((targetTd * 0.4) * targetCoeff);
+                requiredExamMark = pointsNeededFromExamOnly / (targetCoeff * 0.6);
             }
 
-            // إظهار النتائج وفق شروطك الصارمة
+            // إظهار المستشار دائماً في الحالتين
+            advisorBox.style.display = "block";
             if (requiredExamMark <= 20) {
                 let finalMarkToShow = requiredExamMark < 0 ? 0 : requiredExamMark.toFixed(2);
-                advisorBox.style.display = "block";
                 advisorMsg.innerHTML = `في مادة <b style="color:var(--accent);">${targetSubName}</b>: يجب التحصل على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان حتى تتحصل على معدل مقبول.`;
             } else {
-                advisorBox.style.display = "block";
                 advisorMsg.innerHTML = `<span class="advisor-alert">حتى نقطة 20 لن تساعدك للنجاح في مادة (${targetSubName}) لرفع المعدل الفصلي إلى 10.</span>`;
             }
         }
 
-        // خطوة 3: طباعة المعدل الفصلي العام على الشاشة
+        // خطوة 3: عرض النتيجة النهائية للمعدل الفصلي
         const finalResultBox = document.getElementById('finalResult');
-        if (totalCoefficientsForDisplay > 0) {
+        if (totalCoefficientsAll > 0) {
             finalResultBox.innerText = "المعدل الفصلي العام المتوقع: " + finalGPA.toFixed(3) + " من 20";
         } else {
             finalResultBox.innerText = "يرجى إضافة مجموعات ومواد أولاً وكتابة الدرجات ليتم الحساب!";
