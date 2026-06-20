@@ -209,7 +209,19 @@ h1{
   letter-spacing:0.02em; font-family:'Cairo',sans-serif; font-weight:800;
   border:1px solid rgba(216,179,95,0.4);
   position:relative; overflow:hidden;
+  animation:calcAttention 2.4s ease-in-out infinite;
 }
+@keyframes calcAttention{
+  0%, 100%{
+    box-shadow:0 14px 28px -10px rgba(110,31,45,0.55), 0 0 0 0 rgba(216,179,95,0.5);
+    transform:scale(1);
+  }
+  50%{
+    box-shadow:0 18px 34px -8px rgba(110,31,45,0.7), 0 0 0 10px rgba(216,179,95,0);
+    transform:scale(1.015);
+  }
+}
+.btn-calc:hover{ animation-play-state:paused; }
 .btn-calc::before{
   content:""; position:absolute; top:0; right:-60%; width:40%; height:100%;
   background:linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
@@ -397,6 +409,40 @@ input[type="text"]:focus, input[type="number"]:focus{
   .guide-box, .group-box{ background:rgba(251,247,236,0.94); }
   .advisor-area{ background:rgba(255,248,236,0.94); }
 }
+
+/* ---- Fullscreen image lightbox ---- */
+.lightbox-overlay{
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(8,9,16,0.92);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:18px;
+  animation:popupFadeIn 0.25s ease;
+  cursor:zoom-out;
+}
+.lightbox-overlay img{
+  max-width:100%; max-height:100%;
+  width:auto; height:auto;
+  border-radius:6px;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,0.7);
+  animation:popupScaleIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  cursor:default;
+}
+.lightbox-close{
+  position:fixed; top:18px; left:18px; z-index:1001;
+  width:42px; height:42px; border-radius:50%;
+  background:var(--ink); color:var(--gold-light);
+  border:2px solid var(--gold-light);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; font-weight:700; cursor:pointer;
+  box-shadow:0 8px 18px -6px rgba(0,0,0,0.6);
+  transition:transform 0.2s, background 0.2s;
+}
+.lightbox-close:hover{ transform:scale(1.1) rotate(90deg); background:var(--burgundy); }
+
+@media (prefers-reduced-motion: reduce){
+  .lightbox-overlay, .lightbox-overlay img{ animation:none !important; }
+}
 </style>
 </head>
 <body>
@@ -428,7 +474,7 @@ input[type="text"]:focus, input[type="number"]:focus{
       </ul>
 
       <div class="guide-image-container">
-        <img src="guide.jpg" alt="صورة تشرح طريقة استخدام الموقع" class="guide-image">
+        <img src="guide.jpg" alt="صورة تشرح طريقة استخدام الموقع" class="guide-image" onclick="openLightbox(this.src)">
       </div>
     </div>
   </div>
@@ -480,6 +526,12 @@ input[type="text"]:focus, input[type="number"]:focus{
     </div>
     <div class="result-popup-caption" id="resultPopupCaption"></div>
   </div>
+</div>
+
+<!-- Fullscreen lightbox for the guide image -->
+<div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+  <button class="lightbox-close" id="lightboxClose" aria-label="إغلاق" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImage" src="" alt="صورة مكبّرة" onclick="event.stopPropagation()">
 </div>
 
 <script>
@@ -642,9 +694,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target === overlay) closePopupAndStopAudio();
     });
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closePopupAndStopAudio();
+        if (e.key === 'Escape') {
+            closePopupAndStopAudio();
+            closeLightbox();
+        }
     });
 });
+
+function openLightbox(src) {
+    const overlay = document.getElementById('lightboxOverlay');
+    const img = document.getElementById('lightboxImage');
+    img.src = src;
+    overlay.style.display = 'flex';
+}
+
+function closeLightbox() {
+    document.getElementById('lightboxOverlay').style.display = 'none';
+}
 
 function calculateSemesterGPA() {
     const groupBoxes = document.querySelectorAll('.group-box');
