@@ -11,11 +11,13 @@
         h1 { text-align: center; color: var(--primary); margin-bottom: 5px; }
         .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 20px; font-weight: bold; }
         
-        /* صندوق الدليل الإرشادي الجديد */
+        /* صندوق الدليل الإرشادي والصورة */
         .guide-box { background: #ebf5fb; border-right: 5px solid var(--accent); border-radius: 6px; padding: 15px 20px; margin-bottom: 25px; font-size: 0.95rem; line-height: 1.6; }
         .guide-title { font-weight: bold; color: #2980b9; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .guide-list { margin: 0; padding-right: 20px; }
+        .guide-list { margin: 0; padding-right: 20px; margin-bottom: 15px; }
         .guide-list li { margin-bottom: 6px; }
+        .guide-image-container { text-align: center; margin-top: 10px; }
+        .guide-image { max-width: 100%; height: auto; border-radius: 8px; border: 2px solid #bdc3c7; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
         .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; margin: 5px; }
         .btn-add { background: var(--accent); color: white; }
@@ -46,7 +48,6 @@
     <h1>📊 حاسبة المعدل الجامعي بنظام المجموعات (LMD)</h1>
     <p class="subtitle">[نموذج تفاعلي يعتمد حساب معدل كل وحدة أولاً قبل المعدل العام]</p>
     
-    <!-- قسم شرح كيفية عمل الموقع وطريقة إدخال المعلومات -->
     <div class="guide-box">
         <div class="guide-title">📖 دليل الاستخدام وطريقة إدخال المعلومات الصحيحة:</div>
         <ul class="guide-list">
@@ -55,6 +56,10 @@
             <li><b>المواد بدون TD:</b> إذا كانت المادة لا تحتوي على أعمال موجهة (TD)، <b>اترك خانة الـ TD فارغة تماماً</b> وسيتم احتساب نقطة الامتحان بنسبة 100% من معدل المادة تلقائياً.</li>
             <li><b>المستشار الأكاديمي الذكي:</b> إذا كان لديك <u>امتحان مادة واحدة فقط فارغ</u> في الجدول كله، سيظهر لك المستشار تلقائياً ليخبرك بالنقطة الدقيقة التي تحتاجها في ذلك الامتحان للوصول إلى معدل فصلي إجمالي يساوي 10.00.</li>
         </ul>
+        
+        <div class="guide-image-container">
+            <img src="guide.jpg" alt="صورة تشرح طريقة استخدام الموقع" class="guide-image">
+        </div>
     </div>
 
     <div style="text-align: left; margin-bottom: 20px;">
@@ -149,7 +154,6 @@
         const advisorMsg = document.getElementById('advisorMessage');
         advisorBox.style.display = "none"; 
 
-        // الخطوة 1: تحديد الخانة الفارغة ومكانها
         groupBoxes.forEach(box => {
             const gId = box.id.split('_')[1];
             const rows = box.querySelectorAll('.subject-row');
@@ -163,7 +167,6 @@
             });
         });
 
-        // الخطوة 2: حساب معدل كل مجموعة بشكل منفصل (نظام الوحدات)
         groupBoxes.forEach(box => {
             const gId = box.id.split('_')[1];
             const rows = box.querySelectorAll('.subject-row');
@@ -200,7 +203,6 @@
 
         let finalSemesterGPA = totalSemesterCoefficients > 0 ? (totalWeightedGroupAverages / totalSemesterCoefficients) : 0;
 
-        // الخطوة 3: تشغيل حساب المستشار الذكي بناءً على نظام المجموعات
         if (emptyExamsCount === 1 && targetRow !== null) {
             let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
             let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
