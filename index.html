@@ -334,7 +334,59 @@ input[type="text"]:focus, input[type="number"]:focus{
 .result-caption{ font-size:0.96rem; color:var(--ink); text-align:center; max-width:420px; margin-top:14px; line-height:1.7; font-weight:600; }
 .result-empty{ font-size:1.02rem; color:var(--ink); font-weight:700; padding:24px; text-align:center; font-family:'Cairo',sans-serif; }
 
-/* responsive */
+/* ---- Result popup (modal) showing the same medallion ---- */
+.result-popup-overlay{
+  position:fixed; inset:0; z-index:999;
+  background:rgba(13,16,28,0.55);
+  -webkit-backdrop-filter:blur(4px);
+  backdrop-filter:blur(4px);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:20px;
+  animation:popupFadeIn 0.3s ease;
+}
+@keyframes popupFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+.result-popup-card{
+  position:relative;
+  background:linear-gradient(165deg, var(--paper-2), var(--paper));
+  border-radius:16px;
+  padding:38px 30px 30px;
+  max-width:340px; width:100%;
+  text-align:center;
+  box-shadow:0 40px 90px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(216,179,95,0.4);
+  border:1px solid var(--gold-light);
+  animation:popupScaleIn 0.4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popupScaleIn{
+  from{ opacity:0; transform:scale(0.8) translateY(20px); }
+  to{ opacity:1; transform:scale(1) translateY(0); }
+}
+
+.result-popup-close{
+  position:absolute; top:-14px; left:-14px;
+  width:34px; height:34px; border-radius:50%;
+  background:var(--ink); color:var(--gold-light);
+  border:2px solid var(--gold-light);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; font-weight:700; cursor:pointer;
+  box-shadow:0 8px 18px -6px rgba(0,0,0,0.5);
+  transition:transform 0.2s, background 0.2s;
+}
+.result-popup-close:hover{ transform:scale(1.1) rotate(90deg); background:var(--burgundy); }
+
+.result-popup-eyebrow{
+  font-size:0.75rem; letter-spacing:0.08em; color:var(--gold);
+  font-weight:700; text-transform:uppercase; margin-bottom:18px;
+}
+
+.result-popup-caption{
+  font-size:0.92rem; color:var(--ink-2); margin-top:16px; line-height:1.6; font-weight:600;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .result-popup-overlay, .result-popup-card{ animation:none !important; }
+}
 @media (max-width:680px){
   .top-actions, .main-layout, .guide-wrap, .result-section{ margin-left:14px; margin-right:14px; }
   .hero{ padding:36px 18px 28px; }
@@ -419,6 +471,24 @@ input[type="text"]:focus, input[type="number"]:focus{
 
 </div>
 
+<!-- Result popup: shows the same medallion as a dismissible overlay right after calculating -->
+<div class="result-popup-overlay" id="resultPopupOverlay">
+  <div class="result-popup-card">
+    <button class="result-popup-close" id="resultPopupClose" aria-label="إغلاق">✕</button>
+    <div class="result-popup-eyebrow">نتيجتك جاهزة</div>
+    <div class="seal-wrap" id="gaugeWrapPopup" style="display:block; margin:0 auto;">
+      <div class="seal-ring" id="sealRingPopup">
+        <div class="seal-inner">
+          <div class="seal-value" id="gaugeValuePopup">0.00</div>
+          <div class="seal-label">من 20</div>
+        </div>
+      </div>
+      <div class="seal-status" id="sealStatusPopup">قيد الحساب</div>
+    </div>
+    <div class="result-popup-caption" id="resultPopupCaption"></div>
+  </div>
+</div>
+
 <script>
 let groupCount = 0;
 
@@ -487,14 +557,31 @@ function setGauge(value) {
     const status = document.getElementById('sealStatus');
     wrap.style.display = 'block';
 
+    const ringPopup = document.getElementById('sealRingPopup');
+    const valElPopup = document.getElementById('gaugeValuePopup');
+    const statusPopup = document.getElementById('sealStatusPopup');
+    const popupOverlay = document.getElementById('resultPopupOverlay');
+    const popupCaption = document.getElementById('resultPopupCaption');
+
     const pct = Math.max(0, Math.min(1, value / 20)) * 100;
+    const ringColor = value >= 10 ? '#356b45' : '#8c2f23';
+    const statusText = value >= 10 ? '✓ معدل مقبول' : '✗ دون النجاح';
+
     requestAnimationFrame(() => {
         ring.style.setProperty('--p', pct);
+        ringPopup.style.setProperty('--p', pct);
     });
 
     status.classList.toggle('pass', value >= 10);
-    status.textContent = value >= 10 ? '✓ معدل مقبول' : '✗ دون النجاح';
-    ring.style.setProperty('--ring-color', value >= 10 ? '#356b45' : '#8c2f23');
+    status.textContent = statusText;
+    ring.style.setProperty('--ring-color', ringColor);
+
+    statusPopup.classList.toggle('pass', value >= 10);
+    statusPopup.textContent = statusText;
+    ringPopup.style.setProperty('--ring-color', ringColor);
+    popupCaption.innerHTML = value >= 10
+        ? '🎉 تهانينا، معدلك الفصلي مقبول!'
+        : 'معدلك لا يزال دون 10 — راجع المستشار الأكاديمي للتفاصيل.';
 
     let start = null;
     const from = parseFloat(valEl.dataset.last || '0');
@@ -504,12 +591,29 @@ function setGauge(value) {
         if (!start) start = ts;
         const p = Math.min(1, (ts - start) / duration);
         const current = from + (to - from) * p;
-        valEl.textContent = current.toFixed(2);
+        const txt = current.toFixed(2);
+        valEl.textContent = txt;
+        valElPopup.textContent = txt;
         if (p < 1) requestAnimationFrame(step);
-        else valEl.dataset.last = to;
+        else { valEl.dataset.last = to; valElPopup.dataset.last = to; }
     }
     requestAnimationFrame(step);
+
+    // show the popup like a dismissible card right after calculating
+    popupOverlay.style.display = 'flex';
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const overlay = document.getElementById('resultPopupOverlay');
+    const closeBtn = document.getElementById('resultPopupClose');
+    closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.style.display = 'none';
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') overlay.style.display = 'none';
+    });
+});
 
 function calculateSemesterGPA() {
     const groupBoxes = document.querySelectorAll('.group-box');
@@ -660,3 +764,4 @@ window.onload = function () {
 
 </body>
 </html>
+
