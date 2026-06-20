@@ -1,3 +1,4 @@
+HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -87,9 +88,11 @@
         `;
         container.insertAdjacentHTML('beforeend', groupHtml);
         
+        // التعديل الجديد: عند إنشاء المجموعة الأولى، نبدأ بـ 8 خانات فارغة تماماً تلقائياً
         if(groupCount === 1) {
-            addSubjectWithValues(groupCount, "علم القياس", 1, 10, "");
-            addSubjectWithValues(groupCount, "التكنولوجيا الأساسية", 1, 14, "");
+            for (let i = 0; i < 8; i++) {
+                addSubject(groupCount);
+            }
         } else {
             addSubject(groupCount);
         }
@@ -104,21 +107,6 @@
                 <td><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1"></td>
                 <td><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20"></td>
                 <td><input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="اتركه خالياً إن لم يُكتب"></td>
-                <td><button class="btn btn-danger" style="padding:3px 8px;" onclick="removeElement('${rowId}')">حذف</button></td>
-            </tr>
-        `;
-        tbody.insertAdjacentHTML('beforeend', rowHtml);
-    }
-
-    function addSubjectWithValues(groupId, name, coeff, exam, td) {
-        const tbody = document.getElementById(`subject_body_${groupId}`);
-        const rowId = `row_${groupId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-        const rowHtml = `
-            <tr id="${rowId}">
-                <td><input type="text" value="${name}" placeholder="اسم المادة" class="sub-name"></td>
-                <td><input type="number" class="coeff" step="0.5" min="1" value="${coeff}"></td>
-                <td><input type="number" class="exam" step="0.01" min="0" max="20" value="${exam}"></td>
-                <td><input type="number" class="td-mark" step="0.01" min="0" max="20" value="${td}" placeholder="اتركه خالياً إن لم يُكتب"></td>
                 <td><button class="btn btn-danger" style="padding:3px 8px;" onclick="removeElement('${rowId}')">حذف</button></td>
             </tr>
         `;
@@ -180,7 +168,7 @@
 
         let finalGPA = totalCoefficientsAll > 0 ? (totalPointsForDisplay / totalCoefficientsAll) : 0;
 
-        // خطوة 2: تشغيل المستشار فوراً بمجرد وجود مادة واحدة فارغة (مهما كان عدد المواد الأخرى)
+        // خطوة 2: تشغيل المستشار فوراً بمجرد وجود مادة واحدة فارغة في كل الحالات
         if (emptyExamsCount === 1 && targetRow !== null) {
             let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
             let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
@@ -199,7 +187,7 @@
                 requiredExamMark = pointsNeededFromExamOnly / (targetCoeff * 0.6);
             }
 
-            // إظهار المستشار دائماً في الحالتين
+            // إظهار المستشار دائماً
             advisorBox.style.display = "block";
             if (requiredExamMark <= 20) {
                 let finalMarkToShow = requiredExamMark < 0 ? 0 : requiredExamMark.toFixed(2);
