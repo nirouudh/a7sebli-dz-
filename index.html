@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>حاسبة المعدل الجامعي الذكية - نظام LMD</title>
+
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xa5gs0hm51");
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght=500;600;700;800&family=Cairo:wght=400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -25,9 +34,6 @@
 }
 *{box-sizing:border-box;}
 
-/* =========================================================
-   VIDEO BACKGROUND + GLASS LAYER
-========================================================= */
 html, body{ min-height:100%; }
 body{
   margin:0;
@@ -70,9 +76,6 @@ body::before{
   pointer-events:none;
 }
 
-/* =========================================================
-   GLASS CONTAINER
-========================================================= */
 .container{
   max-width:1160px; margin:0 auto; position:relative; z-index:1;
   background:rgba(251,247,236,0.26);
@@ -90,7 +93,6 @@ body::before{
   pointer-events:none; z-index:5; border-radius:9px;
 }
 
-/* ---- Hero ---- */
 .hero{
   background:linear-gradient(160deg, rgba(22,27,46,0.85) 0%, rgba(38,47,82,0.85) 55%, rgba(52,64,110,0.8) 100%);
   color:var(--paper-2);
@@ -149,7 +151,6 @@ h1{
   margin:18px auto 0;
 }
 
-/* ---- Guide ---- */
 .guide-wrap{ padding:28px 30px 0; }
 .guide-box{
   background:rgba(238,231,214,0.26);
@@ -190,7 +191,6 @@ h1{
   box-shadow: 0 12px 28px rgba(22,27,46,0.25);
 }
 
-/* ---- Buttons ---- */
 .btn{
   padding:11px 20px; border:none; border-radius:5px; cursor:pointer;
   font-weight:700; font-family:'Cairo',sans-serif; font-size:0.9rem;
@@ -223,7 +223,6 @@ h1{
 
 .top-actions{ text-align:left; margin:24px 30px 0; }
 
-/* ---- Layout ---- */
 .main-layout{ display:flex; gap:24px; flex-wrap:wrap; margin:20px 30px 0; }
 .content-area{ flex:3; min-width:300px; }
 .advisor-area{
@@ -250,7 +249,6 @@ h1{
 .advisor-msg{ font-size:0.95rem; line-height:1.75; color:var(--ink-2); }
 .advisor-alert{ color:var(--danger); font-weight:700; }
 
-/* ---- Group card ---- */
 .group-box{
   border:1px solid rgba(255,255,255,0.55); border-radius:10px; padding:22px;
   margin-bottom:24px; background:rgba(251,247,236,0.24);
@@ -301,7 +299,6 @@ input[type="text"]:focus, input[type="number"]:focus{
   font-family:'Cairo',sans-serif;
 }
 
-/* ---- Result: wax-seal medallion ---- */
 .result-section{ margin:34px 30px 0; display:flex; flex-direction:column; align-items:center; gap:10px; }
 .seal-wrap{ position:relative; width:170px; height:170px; display:none; }
 .seal-ring{
@@ -334,7 +331,6 @@ input[type="text"]:focus, input[type="number"]:focus{
 .result-caption{ font-size:0.96rem; color:var(--ink); text-align:center; max-width:420px; margin-top:14px; line-height:1.7; font-weight:600; }
 .result-empty{ font-size:1.02rem; color:var(--ink); font-weight:700; padding:24px; text-align:center; font-family:'Cairo',sans-serif; }
 
-/* ---- Result popup (modal) showing the same medallion ---- */
 .result-popup-overlay{
   position:fixed; inset:0; z-index:999;
   background:rgba(13,16,28,0.55);
@@ -392,12 +388,10 @@ input[type="text"]:focus, input[type="number"]:focus{
   .hero{ padding:36px 18px 28px; }
 }
 
-/* reduced motion */
 @media (prefers-reduced-motion: reduce){
   *{ animation:none !important; transition:none !important; }
 }
 
-/* fallback: if backdrop-filter isn't supported, raise opacity so text stays legible */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
   .container{ background:rgba(251,247,236,0.94); }
   .guide-box, .group-box{ background:rgba(251,247,236,0.94); }
@@ -430,7 +424,7 @@ input[type="text"]:focus, input[type="number"]:focus{
         <li><b>تنظيم الوحدات:</b> يعتمد الحساب على نظام المجموعات (الوحدات التعليمية). عدّل اسم كل مجموعة وأضف موادها داخل جدولها.</li>
         <li><b>إدخال المعاملات والنقاط:</b> اكتب اسم المادة (اختياري)، حدد المعامل، وأدخل علامتي الامتحان والـ TD من 0 إلى 20.</li>
         <li><b>المواد بدون TD:</b> اترك خانة الـ TD فارغة تماماً وستُحسب علامة الامتحان بنسبة 100% من معدل المادة.</li>
-        <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله، سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة في ذلك الامتحان لتحقيق معدل فصلي يساوي 10.00.</li>
+        <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله، سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة في ذلك الامتحان لتحقيق معدل فصلي يوازي 10.00.</li>
       </ul>
 
       <div class="guide-image-container">
@@ -491,20 +485,17 @@ input[type="text"]:focus, input[type="number"]:focus{
 <script>
 let groupCount = 0;
 
-// مصفوفة أغاني النجاح والفرح العشوائية
 const successTracks = [
     'reelsvideo.io_1781973559904.mp3',
     'reelsvideo.io_1781978267153.mp3'
 ];
 
-// مصفوفة أغاني الفشل العشوائية (تمت إضافة الملف الفكاهي الجديد هنا)
 const failTracks = [
-    'reelsvideo.io_1781973559904.mp3', // صوت البكاء
-    'reelsvideo.io_1781973704823.mp3', // نغمة آي آي آي الحزينة
-    'reelsvideo.io_1781980214150.mp3'  // العتاب الفكاهي الجديد (علاش مقريتيش علاش؟)
+    'reelsvideo.io_1781973559904.mp3',
+    'reelsvideo.io_1781973704823.mp3',
+    'reelsvideo.io_1781980214150.mp3'
 ];
 
-// متغير لتخزين كائن الصوت المشتغل حالياً حتى لا تتداخل المسارات
 let currentPlayingAudio = null;
 
 function addGroup() {
@@ -614,10 +605,8 @@ function setGauge(value) {
     }
     requestAnimationFrame(step);
 
-    // إيقاف أي صوت مشتغل سابقاً قبل تفعيل المسار الجديد
     stopAllAudio();
 
-    // اختيار الصوت المناسب عشوائياً بناءً على حالة النتيجة
     if (value >= 10) {
         const randomIndex = Math.floor(Math.random() * successTracks.length);
         currentPlayingAudio = new Audio(successTracks[randomIndex]);
@@ -626,9 +615,8 @@ function setGauge(value) {
         currentPlayingAudio = new Audio(failTracks[randomIndex]);
     }
 
-    currentPlayingAudio.play().catch(e => console.log("يرجى التفاعل مع الصفحة أولاً لتفعيل الأصوات العشوائية الذكية.", e));
+    currentPlayingAudio.play().catch(e => console.log("الأصوات تحتاج تفاعل أولاً", e));
 
-    // إظهار اللوحة المنبثقة
     popupOverlay.style.display = 'flex';
 }
 
@@ -660,10 +648,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function calculateSemesterGPA() {
     const groupBoxes = document.querySelectorAll('.group-box');
-
     let totalWeightedGroupAverages = 0;
     let totalSemesterCoefficients = 0;
-
     let emptyExamsCount = 0;
     let targetRow = null;
     let targetGroupId = null;
@@ -688,7 +674,6 @@ function calculateSemesterGPA() {
     groupBoxes.forEach(box => {
         const gId = box.id.split('_')[1];
         const rows = box.querySelectorAll('.subject-row');
-
         let groupPointsSum = 0;
         let groupCoeffSum = 0;
 
@@ -712,7 +697,6 @@ function calculateSemesterGPA() {
         });
 
         let groupAverage = groupCoeffSum > 0 ? (groupPointsSum / groupCoeffSum) : 0;
-
         document.getElementById(`group_summary_${gId}`).innerText = `معدل المجموعة الحالي: ${groupAverage.toFixed(2)} | معامل المجموعة الكلي: ${groupCoeffSum}`;
 
         totalWeightedGroupAverages += (groupAverage * groupCoeffSum);
@@ -725,10 +709,9 @@ function calculateSemesterGPA() {
         let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
         let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
         let targetSubName = targetRow.querySelector('.sub-name').value.trim() || "المادة المتبقية";
-
         let requiredTotalSemesterPoints = 10 * totalSemesterCoefficients;
-
         let fixedGroupsPointsSum = 0;
+
         groupBoxes.forEach(box => {
             const gId = box.id.split('_')[1];
             if (gId !== targetGroupId) {
@@ -747,7 +730,6 @@ function calculateSemesterGPA() {
         });
 
         let pointsNeededFromTargetGroup = requiredTotalSemesterPoints - fixedGroupsPointsSum;
-
         let targetGroupFixedPoints = 0;
         const targetBoxRows = document.getElementById(`group_${targetGroupId}`).querySelectorAll('.subject-row');
         targetBoxRows.forEach(r => {
@@ -762,7 +744,6 @@ function calculateSemesterGPA() {
         });
 
         let pointsNeededFromTargetSubject = pointsNeededFromTargetGroup - targetGroupFixedPoints;
-
         let requiredExamMark = 0;
 
         if (targetTdInput === "") {
@@ -776,7 +757,7 @@ function calculateSemesterGPA() {
         advisorBox.style.display = "block";
         if (requiredExamMark <= 20) {
             let finalMarkToShow = requiredExamMark < 0 ? 0 : requiredExamMark.toFixed(2);
-            advisorMsg.innerHTML = `بناءً على حسابات الوحدات والمجموعات، في مادة <b style="color:var(--ink-2);">${targetSubName}</b>: يجب الحصول على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان لضمان تحقيق معدل فصلي عام يساوي 10.00.`;
+            advisorMsg.innerHTML = `بناءً على حسابات الوحدات والمجموعات، في مادة <b style="color:var(--ink-2);">${targetSubName}</b>: يجب الحصول على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان لضمان تحقيق معدل فصلي عام عام يساوي 10.00.`;
         } else {
             advisorMsg.innerHTML = `<span class="advisor-alert">حتى لو حصلت على 20 في مادة (${targetSubName}) فلن تتمكن بمفردها من رفع المعدل إلى 10، ستحتاج لتعويضها من مجموعات أخرى.</span>`;
         }
