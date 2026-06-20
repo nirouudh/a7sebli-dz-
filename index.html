@@ -89,8 +89,9 @@
         `;
         container.insertAdjacentHTML('beforeend', groupHtml);
         
+        // التعديل الجديد هنا: البدء بـ 3 خانات فارغة فقط عند تشغيل الموقع
         if(groupCount === 1) {
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 3; i++) {
                 addSubject(groupCount);
             }
         } else {
@@ -120,8 +121,8 @@
     function calculateSemesterGPA() {
         const groupBoxes = document.querySelectorAll('.group-box');
         
-        let totalWeightedGroupAverages = 0; // مجموع (معدل المجموعة * معامل المجموعة)
-        let totalSemesterCoefficients = 0;  // مجموع معاملات المجموعات كلها
+        let totalWeightedGroupAverages = 0; 
+        let totalSemesterCoefficients = 0;  
 
         let emptyExamsCount = 0;
         let targetRow = null;
@@ -131,7 +132,7 @@
         const advisorMsg = document.getElementById('advisorMessage');
         advisorBox.style.display = "none"; 
 
-        // الخطوة 1: جرد لمعرفة الخانة الفارغة ومكانها
+        // الخطوة 1: تحديد الخانة الفارغة ومكانها
         groupBoxes.forEach(box => {
             const gId = box.id.split('_')[1];
             const rows = box.querySelectorAll('.subject-row');
@@ -145,7 +146,7 @@
             });
         });
 
-        // الخطوة 2: حساب معدل كل مجموعة على حدة بناءً على ترابط المواد داخلياً
+        // الخطوة 2: حساب معدل كل مجموعة بشكل منفصل (نظام الوحدات)
         groupBoxes.forEach(box => {
             const gId = box.id.split('_')[1];
             const rows = box.querySelectorAll('.subject-row');
@@ -166,7 +167,7 @@
                     let td = parseFloat(tdInput) || 0;
                     subjectAverage = (exam * 0.6) + (td * 0.4);
                 } else if (examInput === "") {
-                    subjectAverage = 0; // إذا كانت فارغة، تحسب مؤقتاً صفر في المعدل المعروض
+                    subjectAverage = 0; 
                 }
                 
                 groupPointsSum += (subjectAverage * coeff);
@@ -174,28 +175,22 @@
 
             let groupAverage = groupCoeffSum > 0 ? (groupPointsSum / groupCoeffSum) : 0;
             
-            // تحديث النص أسفل كل مجموعة ليعرف المستخدم تفاصيل وحدته التعليمية
             document.getElementById(`group_summary_${gId}`).innerText = `معدل المجموعة الحالي: ${groupAverage.toFixed(2)} | معامل المجموعة الكلي: ${groupCoeffSum}`;
 
-            // في نظام LMD الجزائري: معامل المجموعة هو نفسه مجموع معاملات موادها
             totalWeightedGroupAverages += (groupAverage * groupCoeffSum);
             totalSemesterCoefficients += groupCoeffSum;
         });
 
-        // حساب المعدل الفصلي العام المعروض حالياً
         let finalSemesterGPA = totalSemesterCoefficients > 0 ? (totalWeightedGroupAverages / totalSemesterCoefficients) : 0;
 
-        // الخطوة 3: حسابات المستشار الذكي بناءً على الخوارزمية المترابطة للمجموعات
+        // الخطوة 3: تشغيل حساب المستشار الذكي بناءً على نظام المجموعات
         if (emptyExamsCount === 1 && targetRow !== null) {
             let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
             let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
             let targetSubName = targetRow.querySelector('.sub-name').value.trim() || "المادة المتبقية";
 
-            // لحساب النقطة التي تضمن معدل فصلي إجمالي = 10:
-            // 1. كم نقطة إجمالية نحتاجها في الفصل ككل؟
             let requiredTotalSemesterPoints = 10 * totalSemesterCoefficients;
 
-            // 2. نحسب مجموع نقاط المجموعات الأخرى الثابتة (باستثناء نقاط المجموعة التي تحتوي على المادة الفارغة)
             let fixedGroupsPointsSum = 0;
             groupBoxes.forEach(box => {
                 const gId = box.id.split('_')[1];
@@ -210,14 +205,12 @@
                         if (tdIn !== "") subAvg = (ex * 0.6) + (parseFloat(tdIn) * 0.4);
                         gPoints += (subAvg * c);
                     });
-                    fixedGroupsPointsSum += gPoints; // إضافة نقاط المجموعة الثابتة بالكامل
+                    fixedGroupsPointsSum += gPoints;
                 }
             });
 
-            // 3. كم نقطة تحتاجها المجموعة المستهدفة لتعويض عجز الفصل؟
             let pointsNeededFromTargetGroup = requiredTotalSemesterPoints - fixedGroupsPointsSum;
 
-            // 4. داخل المجموعة المستهدفة، نحسب كم نقطة جمعتها المواد الأخرى المملوءة
             let targetGroupFixedPoints = 0;
             const targetBoxRows = document.getElementById(`group_${targetGroupId}`).querySelectorAll('.subject-row');
             targetBoxRows.forEach(r => {
@@ -231,7 +224,6 @@
                 }
             });
 
-            // 5. النقاط الصافية المطلوبة من المادة الفارغة داخل مجموعتها
             let pointsNeededFromTargetSubject = pointsNeededFromTargetGroup - targetGroupFixedPoints;
 
             let requiredExamMark = 0;
@@ -244,7 +236,6 @@
                 requiredExamMark = pointsNeededFromExamOnly / (targetCoeff * 0.6);
             }
 
-            // إظهار صندوق المستشار ببياناته الدقيقة المطابقة لنظام الوحدات والمجموعات
             advisorBox.style.display = "block";
             if (requiredExamMark <= 20) {
                 let finalMarkToShow = requiredExamMark < 0 ? 0 : requiredExamMark.toFixed(2);
@@ -254,7 +245,6 @@
             }
         }
 
-        // طباعة المعدل الإجمالي للفصل
         const finalResultBox = document.getElementById('finalResult');
         if (totalSemesterCoefficients > 0) {
             finalResultBox.innerText = "المعدل الفصلي العام المتوقع: " + finalSemesterGPA.toFixed(3) + " من 20";
