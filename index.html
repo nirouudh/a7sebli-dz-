@@ -356,4 +356,437 @@ input[type="text"]:focus, input[type="number"]:focus{
   text-align:center;
   box-shadow:0 40px 90px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(216,179,95,0.4);
   border:1px solid var(--gold-light);
-  animation:popupScaleIn 0.4s cubic-bezier(.34,
+  animation:popupScaleIn 0.4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popupScaleIn{
+  from{ opacity:0; transform:scale(0.8) translateY(20px); }
+  to{ opacity:1; transform:scale(1) translateY(0); }
+}
+
+.result-popup-close{
+  position:absolute; top:-14px; left:-14px;
+  width:34px; height:34px; border-radius:50%;
+  background:var(--ink); color:var(--gold-light);
+  border:2px solid var(--gold-light);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; font-weight:700; cursor:pointer;
+  box-shadow:0 8px 18px -6px rgba(0,0,0,0.5);
+  transition:transform 0.2s, background 0.2s;
+}
+.result-popup-close:hover{ transform:scale(1.1) rotate(90deg); background:var(--burgundy); }
+
+.result-popup-eyebrow{
+  font-size:0.75rem; letter-spacing:0.08em; color:var(--gold);
+  font-weight:700; text-transform:uppercase; margin-bottom:18px;
+}
+
+.result-popup-caption{
+  font-size:0.92rem; color:var(--ink-2); margin-top:16px; line-height:1.6; font-weight:600;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .result-popup-overlay, .result-popup-card{ animation:none !important; }
+}
+@media (max-width:680px){
+  .top-actions, .main-layout, .guide-wrap, .result-section{ margin-left:14px; margin-right:14px; }
+  .hero{ padding:36px 18px 28px; }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; }
+}
+
+/* fallback: if backdrop-filter isn't supported, raise opacity so text stays legible */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  .container{ background:rgba(251,247,236,0.94); }
+  .guide-box, .group-box{ background:rgba(251,247,236,0.94); }
+  .advisor-area{ background:rgba(255,248,236,0.94); }
+}
+</style>
+</head>
+<body>
+
+<div class="video-bg">
+  <video autoplay muted loop playsinline preload="auto">
+    <source src="my-video.webm" type="video/webm">
+    <source src="./my-video.webm" type="video/webm">
+  </video>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="hero-crest">🎓</div>
+    <span class="hero-eyebrow"><span class="dot"></span> نظام LMD &middot; حساب وحدات ومجموعات</span>
+    <h1>حاسبة المعدل الجامعي</h1>
+    <p class="subtitle">احسب معدل كل وحدة تعليمية على حدة، ثم المعدل الفصلي العام — مع مستشار أكاديمي يخبرك بالعلامة التي تحتاجها بالضبط.</p>
+    <div class="hero-rule"></div>
+  </div>
+
+  <div class="guide-wrap">
+    <div class="guide-box">
+      <div class="guide-title">📖 دليل الاستخدام وطريقة إدخال العلامات:</div>
+      <ul class="guide-list">
+        <li><b>تنظيم الوحدات:</b> يعتمد الحساب على نظام المجموعات (الوحدات التعليمية). عدّل اسم كل مجموعة وأضف موادها داخل جدولها.</li>
+        <li><b>إدخال المعاملات والنقاط:</b> اكتب اسم المادة (اختياري)، حدد المعامل، وأدخل علامتي الامتحان والـ TD من 0 إلى 20.</li>
+        <li><b>المواد بدون TD:</b> اترك خانة الـ TD فارغة تماماً وستُحسب علامة الامتحان بنسبة 100% من معدل المادة.</li>
+        <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله, سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة في ذلك الامتحان لتحقيق معدل فصلي يساوي 10.00.</li>
+      </ul>
+
+      <div class="guide-image-container">
+        <img src="guide.jpg" alt="صورة تشرح طريقة استخدام الموقع" class="guide-image">
+      </div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <button class="btn btn-add" onclick="addGroup()">➕ إضافة مجموعة (وحدة تعليمية) جديدة</button>
+  </div>
+
+  <div class="main-layout">
+    <div class="content-area" id="groupsContainer"></div>
+    <div class="advisor-area" id="advisorContainer">
+      <div class="advisor-title">💡 المستشار الأكاديمي المصيري</div>
+      <div class="advisor-msg" id="advisorMessage"></div>
+    </div>
+  </div>
+
+  <div style="margin:0 30px;">
+    <button class="btn btn-calc" onclick="calculateSemesterGPA()">🧮 احسب المعدل الفصلي العام</button>
+  </div>
+
+  <div class="result-section">
+    <div class="seal-wrap" id="gaugeWrap">
+      <div class="seal-ring" id="sealRing">
+        <div class="seal-inner">
+          <div class="seal-value" id="gaugeValue">0.00</div>
+          <div class="seal-label">من 20</div>
+        </div>
+      </div>
+      <div class="seal-status" id="sealStatus">قيد الحساب</div>
+    </div>
+    <div class="result-empty" id="finalResult">يرجى إضافة المواد وعلاماتها أولاً، ثم اضغط على زر الحساب 🧮</div>
+    <div class="result-caption" id="resultCaption"></div>
+  </div>
+
+</div>
+
+<div class="result-popup-overlay" id="resultPopupOverlay">
+  <div class="result-popup-card">
+    <button class="result-popup-close" id="resultPopupClose" aria-label="إغلاق">✕</button>
+    <div class="result-popup-eyebrow">نتيجتك جاهزة</div>
+    <div class="seal-wrap" id="gaugeWrapPopup" style="display:block; margin:0 auto;">
+      <div class="seal-ring" id="sealRingPopup">
+        <div class="seal-inner">
+          <div class="seal-value" id="gaugeValuePopup">0.00</div>
+          <div class="seal-label">من 20</div>
+        </div>
+      </div>
+      <div class="seal-status" id="sealStatusPopup">قيد الحساب</div>
+    </div>
+    <div class="result-popup-caption" id="resultPopupCaption"></div>
+  </div>
+</div>
+
+<script>
+let groupCount = 0;
+
+// الهندسة الصوتية: تعريف الملفات الصوتية الصحيحة بناءً على المرفوعات
+const successAudio = new Audio('reelsvideo.io_1781973559904.mp3');
+const failAudio = new Audio('reelsvideo.io_1781973704823.mp3');
+
+function addGroup() {
+    groupCount++;
+    const container = document.getElementById('groupsContainer');
+    const groupHtml = `
+        <div class="group-box" id="group_${groupCount}">
+            <div class="group-header">
+                <input type="text" class="group-title-input" value="المجموعة التعليمية ${groupCount}">
+                <button class="btn btn-danger" onclick="removeElement('group_${groupCount}')">حذف المجموعة ❌</button>
+            </div>
+            <button class="btn btn-add" style="font-size:0.85rem;" onclick="addSubject(${groupCount})">➕ إضافة مادة</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم المادة (اختياري)</th>
+                        <th>المعامل</th>
+                        <th>نقطة الامتحان</th>
+                        <th>نقطة الـ TD (اتركها فارغة إن لم يوجد)</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="subject_body_${groupCount}"></tbody>
+            </table>
+            <div class="group-summary" id="group_summary_${groupCount}">معدل المجموعة الحالي: -- | معامل المجموعة الكلي: --</div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', groupHtml);
+
+    if (groupCount === 1) {
+        for (let i = 0; i < 3; i++) addSubject(groupCount);
+    } else {
+        addSubject(groupCount);
+    }
+}
+
+function addSubject(groupId) {
+    const tbody = document.getElementById(`subject_body_${groupId}`);
+    const rowId = `row_${groupId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const rowHtml = `
+        <tr id="${rowId}" class="subject-row">
+            <td><input type="text" placeholder="اسم المادة" class="sub-name"></td>
+            <td><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1"></td>
+            <td><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20"></td>
+            <td><input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="0-20"></td>
+            <td><button class="btn btn-danger" style="padding:4px 10px;" onclick="removeElement('${rowId}')">حذف</button></td>
+        </tr>
+    `;
+    tbody.insertAdjacentHTML('beforeend', rowHtml);
+}
+
+function removeElement(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.transition = 'opacity 0.25s, transform 0.25s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(8px)';
+    setTimeout(() => el.remove(), 220);
+}
+
+function setGauge(value) {
+    const wrap = document.getElementById('gaugeWrap');
+    const ring = document.getElementById('sealRing');
+    const valEl = document.getElementById('gaugeValue');
+    const status = document.getElementById('sealStatus');
+    wrap.style.display = 'block';
+
+    const ringPopup = document.getElementById('sealRingPopup');
+    const valElPopup = document.getElementById('gaugeValuePopup');
+    const statusPopup = document.getElementById('sealStatusPopup');
+    const popupOverlay = document.getElementById('resultPopupOverlay');
+    const popupCaption = document.getElementById('resultPopupCaption');
+
+    const pct = Math.max(0, Math.min(1, value / 20)) * 100;
+    const ringColor = value >= 10 ? '#356b45' : '#8c2f23';
+    const statusText = value >= 10 ? '✓ معدل مقبول' : '✗ دون النجاح';
+
+    requestAnimationFrame(() => {
+        ring.style.setProperty('--p', pct);
+        ringPopup.style.setProperty('--p', pct);
+    });
+
+    status.classList.toggle('pass', value >= 10);
+    status.textContent = statusText;
+    ring.style.setProperty('--ring-color', ringColor);
+
+    statusPopup.classList.toggle('pass', value >= 10);
+    statusPopup.textContent = statusText;
+    ringPopup.style.setProperty('--ring-color', ringColor);
+    popupCaption.innerHTML = value >= 10
+        ? '🎉 تهانينا، معدلك الفصلي مقبول!'
+        : 'معدلك لا يزال دون 10 — راجع المستشار الأكاديمي للتفاصيل.';
+
+    let start = null;
+    const from = parseFloat(valEl.dataset.last || '0');
+    const to = value;
+    const duration = 1000;
+    function step(ts) {
+        if (!start) start = ts;
+        const p = Math.min(1, (ts - start) / duration);
+        const current = from + (to - from) * p;
+        const txt = current.toFixed(2);
+        valEl.textContent = txt;
+        valElPopup.textContent = txt;
+        if (p < 1) requestAnimationFrame(step);
+        else { valEl.dataset.last = to; valElPopup.dataset.last = to; }
+    }
+    requestAnimationFrame(step);
+
+    // التحكم بالتشغيل الصوتي الذكي
+    if (value >= 10) {
+        successAudio.play().catch(e => console.log("تحذير المتصفح: تفاعل أولاً لتشغيل الصوت", e));
+    } else {
+        failAudio.play().catch(e => console.log("تحذير المتصفح: تفاعل أولاً لتشغيل الصوت", e));
+    }
+
+    // إظهار الإطار الإعلاني البوب-آب
+    popupOverlay.style.display = 'flex';
+}
+
+// دالة موحدة لتصفير كافة الأصوات وإخفاء الواجهة
+function closePopupAndStopAudio() {
+    const overlay = document.getElementById('resultPopupOverlay');
+    overlay.style.display = 'none';
+
+    successAudio.pause();
+    successAudio.currentTime = 0;
+
+    failAudio.pause();
+    failAudio.currentTime = 0;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const overlay = document.getElementById('resultPopupOverlay');
+    const closeBtn = document.getElementById('resultPopupClose');
+    
+    closeBtn.addEventListener('click', closePopupAndStopAudio);
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closePopupAndStopAudio();
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closePopupAndStopAudio();
+    });
+});
+
+function calculateSemesterGPA() {
+    const groupBoxes = document.querySelectorAll('.group-box');
+
+    let totalWeightedGroupAverages = 0;
+    let totalSemesterCoefficients = 0;
+
+    let emptyExamsCount = 0;
+    let targetRow = null;
+    let targetGroupId = null;
+
+    const advisorBox = document.getElementById('advisorContainer');
+    const advisorMsg = document.getElementById('advisorMessage');
+    advisorBox.style.display = "none";
+
+    groupBoxes.forEach(box => {
+        const gId = box.id.split('_')[1];
+        const rows = box.querySelectorAll('.subject-row');
+        rows.forEach(row => {
+            let examInput = row.querySelector('.exam').value.trim();
+            if (examInput === "") {
+                emptyExamsCount++;
+                targetRow = row;
+                targetGroupId = gId;
+            }
+        });
+    });
+
+    groupBoxes.forEach(box => {
+        const gId = box.id.split('_')[1];
+        const rows = box.querySelectorAll('.subject-row');
+
+        let groupPointsSum = 0;
+        let groupCoeffSum = 0;
+
+        rows.forEach(row => {
+            let coeff = parseFloat(row.querySelector('.coeff').value) || 1;
+            let examInput = row.querySelector('.exam').value.trim();
+            let tdInput = row.querySelector('.td-mark').value.trim();
+
+            groupCoeffSum += coeff;
+
+            let exam = parseFloat(examInput) || 0;
+            let subjectAverage = exam;
+            if (tdInput !== "") {
+                let td = parseFloat(tdInput) || 0;
+                subjectAverage = (exam * 0.6) + (td * 0.4);
+            } else if (examInput === "") {
+                subjectAverage = 0;
+            }
+
+            groupPointsSum += (subjectAverage * coeff);
+        });
+
+        let groupAverage = groupCoeffSum > 0 ? (groupPointsSum / groupCoeffSum) : 0;
+
+        document.getElementById(`group_summary_${gId}`).innerText = `معدل المجموعة الحالي: ${groupAverage.toFixed(2)} | معامل المجموعة الكلي: ${groupCoeffSum}`;
+
+        totalWeightedGroupAverages += (groupAverage * groupCoeffSum);
+        totalSemesterCoefficients += groupCoeffSum;
+    });
+
+    let finalSemesterGPA = totalSemesterCoefficients > 0 ? (totalWeightedGroupAverages / totalSemesterCoefficients) : 0;
+
+    if (emptyExamsCount === 1 && targetRow !== null) {
+        let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
+        let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
+        let targetSubName = targetRow.querySelector('.sub-name').value.trim() || "المادة المتبقية";
+
+        let requiredTotalSemesterPoints = 10 * totalSemesterCoefficients;
+
+        let fixedGroupsPointsSum = 0;
+        groupBoxes.forEach(box => {
+            const gId = box.id.split('_')[1];
+            if (gId !== targetGroupId) {
+                const rows = box.querySelectorAll('.subject-row');
+                let gPoints = 0;
+                rows.forEach(r => {
+                    let c = parseFloat(r.querySelector('.coeff').value) || 1;
+                    let ex = parseFloat(r.querySelector('.exam').value) || 0;
+                    let tdIn = r.querySelector('.td-mark').value.trim();
+                    let subAvg = ex;
+                    if (tdIn !== "") subAvg = (ex * 0.6) + (parseFloat(tdIn) * 0.4);
+                    gPoints += (subAvg * c);
+                });
+                fixedGroupsPointsSum += gPoints;
+            }
+        });
+
+        let pointsNeededFromTargetGroup = requiredTotalSemesterPoints - fixedGroupsPointsSum;
+
+        let targetGroupFixedPoints = 0;
+        const targetBoxRows = document.getElementById(`group_${targetGroupId}`).querySelectorAll('.subject-row');
+        targetBoxRows.forEach(r => {
+            if (r !== targetRow) {
+                let c = parseFloat(r.querySelector('.coeff').value) || 1;
+                let ex = parseFloat(r.querySelector('.exam').value) || 0;
+                let tdIn = r.querySelector('.td-mark').value.trim();
+                let subAvg = ex;
+                if (tdIn !== "") subAvg = (ex * 0.6) + (parseFloat(tdIn) * 0.4);
+                targetGroupFixedPoints += (subAvg * c);
+            }
+        });
+
+        let pointsNeededFromTargetSubject = pointsNeededFromTargetGroup - targetGroupFixedPoints;
+
+        let requiredExamMark = 0;
+
+        if (targetTdInput === "") {
+            requiredExamMark = pointsNeededFromTargetSubject / targetCoeff;
+        } else {
+            let targetTd = parseFloat(targetTdInput) || 0;
+            let pointsNeededFromExamOnly = pointsNeededFromTargetSubject - ((targetTd * 0.4) * targetCoeff);
+            requiredExamMark = pointsNeededFromExamOnly / (targetCoeff * 0.6);
+        }
+
+        advisorBox.style.display = "block";
+        if (requiredExamMark <= 20) {
+            let finalMarkToShow = requiredExamMark < 0 ? 0 : requiredExamMark.toFixed(2);
+            advisorMsg.innerHTML = `بناءً على حسابات الوحدات والمجموعات، في مادة <b style="color:var(--ink-2);">${targetSubName}</b>: يجب الحصول على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان لضمان تحقيق معدل فصلي عام يساوي 10.00.`;
+        } else {
+            advisorMsg.innerHTML = `<span class="advisor-alert">حتى لو حصلت على 20 في مادة (${targetSubName}) فلن تتمكن بمفردها من رفع المعدل إلى 10، ستحتاج لتعويضها من مجموعات أخرى.</span>`;
+        }
+    }
+
+    const finalResultBox = document.getElementById('finalResult');
+    const caption = document.getElementById('resultCaption');
+    if (totalSemesterCoefficients > 0) {
+        finalResultBox.style.display = 'none';
+        setGauge(finalSemesterGPA);
+        if (finalSemesterGPA >= 10) {
+            caption.innerHTML = `🎉 معدلك الفصلي العام المتوقع: <b style="color:var(--ink);">${finalSemesterGPA.toFixed(3)} من 20</b> — معدل مقبول!`;
+        } else {
+            caption.innerHTML = `معدلك الفصلي العام المتوقع: <b style="color:var(--ink);">${finalSemesterGPA.toFixed(3)} من 20</b> — لا يزال دون 10، تابع الاستشارة الأكاديمية إن ظهرت.`;
+        }
+    } else {
+        document.getElementById('gaugeWrap').style.display = 'none';
+        finalResultBox.style.display = 'block';
+        finalResultBox.innerText = "يرجى إضافة المواد وعلاماتها أولاً!";
+        caption.innerHTML = '';
+    }
+}
+
+window.onload = function () {
+    addGroup();
+};
+</script>
+
+</body>
+</html>
