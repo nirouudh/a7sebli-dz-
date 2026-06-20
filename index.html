@@ -1,4 +1,3 @@
-HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -31,16 +30,17 @@ HTML
         th { background: #e5e8e8; color: var(--primary); }
         input[type="text"], input[type="number"] { width: 90%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: center; font-size: 0.95rem; }
         .result-box { background: var(--primary); color: white; padding: 20px; border-radius: 8px; text-align: center; margin-top: 25px; font-size: 1.5rem; font-weight: bold; }
+        .group-summary { font-size: 0.9rem; color: #7f8c8d; text-align: left; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📊 حاسبة المعدل الجامعي المرنة (نظام LMD)</h1>
-    <p class="subtitle">[نموذج التسجيل الأول المطور - مجموعات ومواد تفاعلية]</p>
+    <h1>📊 حاسبة المعدل الجامعي بنظام المجموعات (LMD)</h1>
+    <p class="subtitle">[نموذج تفاعلي يعتمد حساب معدل كل وحدة أولاً قبل المعدل العام]</p>
     
     <div style="text-align: left; margin-bottom: 20px;">
-        <button class="btn btn-add" onclick="addGroup()">➕ إضافة مجموعة اختيارية جديدة</button>
+        <button class="btn btn-add" onclick="addGroup()">➕ إضافة مجموعة (وحدة تعليمية) جديدة</button>
     </div>
 
     <div class="main-layout">
@@ -67,28 +67,28 @@ HTML
         const groupHtml = `
             <div class="group-box" id="group_${groupCount}">
                 <div class="group-header">
-                    <input type="text" class="group-title-input" value="المجموعة الاختيارية ${groupCount}">
+                    <input type="text" class="group-title-input" value="المجموعة التعليمية ${groupCount}">
                     <button class="btn btn-danger" onclick="removeElement('group_${groupCount}')">حذف المجموعة ❌</button>
                 </div>
-                <button class="btn btn-add" style="font-size:0.85rem;" onclick="addSubject(${groupCount})">➕ إضافة مادة اختيارية</button>
+                <button class="btn btn-add" style="font-size:0.85rem;" onclick="addSubject(${groupCount})">➕ إضافة مادة للشركة</button>
                 <table>
                     <thead>
                         <tr>
                             <th>أسماء مواد اختيارية</th>
-                            <th>المعامل (اختياري)</th>
+                            <th>المعامل</th>
                             <th>نقطة الامتحان</th>
-                            <th>نقطة الـ td (فارغ للمسح)</th>
+                            <th>نقطة الـ td (اتركه فارغاً إن لم يوجد)</th>
                             <th>إجراء</th>
                         </tr>
                     </thead>
                     <tbody id="subject_body_${groupCount}">
                     </tbody>
                 </table>
+                <div class="group-summary" id="group_summary_${groupCount}">معدل المجموعة الحالي: -- | معامل المجموعة الكلي: --</div>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', groupHtml);
         
-        // التعديل الجديد: عند إنشاء المجموعة الأولى، نبدأ بـ 8 خانات فارغة تماماً تلقائياً
         if(groupCount === 1) {
             for (let i = 0; i < 8; i++) {
                 addSubject(groupCount);
@@ -102,11 +102,11 @@ HTML
         const tbody = document.getElementById(`subject_body_${groupId}`);
         const rowId = `row_${groupId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
         const rowHtml = `
-            <tr id="${rowId}">
+            <tr id="${rowId}" class="subject-row">
                 <td><input type="text" placeholder="اسم المادة" class="sub-name"></td>
                 <td><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1"></td>
                 <td><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20"></td>
-                <td><input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="اتركه خالياً إن لم يُكتب"></td>
+                <td><input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="0-20"></td>
                 <td><button class="btn btn-danger" style="padding:3px 8px;" onclick="removeElement('${rowId}')">حذف</button></td>
             </tr>
         `;
@@ -120,63 +120,120 @@ HTML
     function calculateSemesterGPA() {
         const groupBoxes = document.querySelectorAll('.group-box');
         
-        let totalPointsFromFilled = 0; 
-        let totalCoefficientsAll = 0;   
-        
+        let totalWeightedGroupAverages = 0; // مجموع (معدل المجموعة * معامل المجموعة)
+        let totalSemesterCoefficients = 0;  // مجموع معاملات المجموعات كلها
+
         let emptyExamsCount = 0;
         let targetRow = null;
+        let targetGroupId = null;
 
         const advisorBox = document.getElementById('advisorContainer');
         const advisorMsg = document.getElementById('advisorMessage');
         advisorBox.style.display = "none"; 
 
-        // خطوة 1: جمع البيانات وفرز المواد
+        // الخطوة 1: جرد لمعرفة الخانة الفارغة ومكانها
         groupBoxes.forEach(box => {
-            const rows = box.querySelectorAll('tbody tr');
+            const gId = box.id.split('_')[1];
+            const rows = box.querySelectorAll('.subject-row');
+            rows.forEach(row => {
+                let examInput = row.querySelector('.exam').value.trim();
+                if (examInput === "") {
+                    emptyExamsCount++;
+                    targetRow = row;
+                    targetGroupId = gId;
+                }
+            });
+        });
+
+        // الخطوة 2: حساب معدل كل مجموعة على حدة بناءً على ترابط المواد داخلياً
+        groupBoxes.forEach(box => {
+            const gId = box.id.split('_')[1];
+            const rows = box.querySelectorAll('.subject-row');
+            
+            let groupPointsSum = 0;
+            let groupCoeffSum = 0;
+
             rows.forEach(row => {
                 let coeff = parseFloat(row.querySelector('.coeff').value) || 1;
                 let examInput = row.querySelector('.exam').value.trim();
                 let tdInput = row.querySelector('.td-mark').value.trim();
 
-                totalCoefficientsAll += coeff; 
+                groupCoeffSum += coeff;
 
-                if (examInput === "") {
-                    emptyExamsCount++;
-                    targetRow = row; 
-                } else {
-                    let exam = parseFloat(examInput) || 0;
-                    let subjectAverage = exam;
-                    if (tdInput !== "") {
-                        let td = parseFloat(tdInput) || 0;
-                        subjectAverage = (exam * 0.6) + (td * 0.4);
-                    }
-                    totalPointsFromFilled += (subjectAverage * coeff);
+                let exam = parseFloat(examInput) || 0; 
+                let subjectAverage = exam;
+                if (tdInput !== "") {
+                    let td = parseFloat(tdInput) || 0;
+                    subjectAverage = (exam * 0.6) + (td * 0.4);
+                } else if (examInput === "") {
+                    subjectAverage = 0; // إذا كانت فارغة، تحسب مؤقتاً صفر في المعدل المعروض
                 }
+                
+                groupPointsSum += (subjectAverage * coeff);
             });
+
+            let groupAverage = groupCoeffSum > 0 ? (groupPointsSum / groupCoeffSum) : 0;
+            
+            // تحديث النص أسفل كل مجموعة ليعرف المستخدم تفاصيل وحدته التعليمية
+            document.getElementById(`group_summary_${gId}`).innerText = `معدل المجموعة الحالي: ${groupAverage.toFixed(2)} | معامل المجموعة الكلي: ${groupCoeffSum}`;
+
+            // في نظام LMD الجزائري: معامل المجموعة هو نفسه مجموع معاملات موادها
+            totalWeightedGroupAverages += (groupAverage * groupCoeffSum);
+            totalSemesterCoefficients += groupCoeffSum;
         });
 
-        // حساب المجموع الإجمالي الفعلي لعرضه على الشاشة (باعتبار الامتحان الفارغ = 0 حالياً)
-        let totalPointsForDisplay = totalPointsFromFilled;
-        if (emptyExamsCount === 1 && targetRow !== null) {
-            let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
-            let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
-            if (targetTdInput !== "") {
-                let targetTd = parseFloat(targetTdInput) || 0;
-                totalPointsForDisplay += ((targetTd * 0.4) * targetCoeff); 
-            }
-        }
+        // حساب المعدل الفصلي العام المعروض حالياً
+        let finalSemesterGPA = totalSemesterCoefficients > 0 ? (totalWeightedGroupAverages / totalSemesterCoefficients) : 0;
 
-        let finalGPA = totalCoefficientsAll > 0 ? (totalPointsForDisplay / totalCoefficientsAll) : 0;
-
-        // خطوة 2: تشغيل المستشار فوراً بمجرد وجود مادة واحدة فارغة في كل الحالات
+        // الخطوة 3: حسابات المستشار الذكي بناءً على الخوارزمية المترابطة للمجموعات
         if (emptyExamsCount === 1 && targetRow !== null) {
             let targetCoeff = parseFloat(targetRow.querySelector('.coeff').value) || 1;
             let targetTdInput = targetRow.querySelector('.td-mark').value.trim();
             let targetSubName = targetRow.querySelector('.sub-name').value.trim() || "المادة المتبقية";
 
-            let requiredTotalPoints = 10 * totalCoefficientsAll;
-            let pointsNeededFromTargetSubject = requiredTotalPoints - totalPointsFromFilled;
-            
+            // لحساب النقطة التي تضمن معدل فصلي إجمالي = 10:
+            // 1. كم نقطة إجمالية نحتاجها في الفصل ككل؟
+            let requiredTotalSemesterPoints = 10 * totalSemesterCoefficients;
+
+            // 2. نحسب مجموع نقاط المجموعات الأخرى الثابتة (باستثناء نقاط المجموعة التي تحتوي على المادة الفارغة)
+            let fixedGroupsPointsSum = 0;
+            groupBoxes.forEach(box => {
+                const gId = box.id.split('_')[1];
+                if (gId !== targetGroupId) {
+                    const rows = box.querySelectorAll('.subject-row');
+                    let gPoints = 0;
+                    rows.forEach(r => {
+                        let c = parseFloat(r.querySelector('.coeff').value) || 1;
+                        let ex = parseFloat(r.querySelector('.exam').value) || 0;
+                        let tdIn = r.querySelector('.td-mark').value.trim();
+                        let subAvg = ex;
+                        if (tdIn !== "") subAvg = (ex * 0.6) + (parseFloat(tdIn) * 0.4);
+                        gPoints += (subAvg * c);
+                    });
+                    fixedGroupsPointsSum += gPoints; // إضافة نقاط المجموعة الثابتة بالكامل
+                }
+            });
+
+            // 3. كم نقطة تحتاجها المجموعة المستهدفة لتعويض عجز الفصل؟
+            let pointsNeededFromTargetGroup = requiredTotalSemesterPoints - fixedGroupsPointsSum;
+
+            // 4. داخل المجموعة المستهدفة، نحسب كم نقطة جمعتها المواد الأخرى المملوءة
+            let targetGroupFixedPoints = 0;
+            const targetBoxRows = document.getElementById(`group_${targetGroupId}`).querySelectorAll('.subject-row');
+            targetBoxRows.forEach(r => {
+                if (r !== targetRow) {
+                    let c = parseFloat(r.querySelector('.coeff').value) || 1;
+                    let ex = parseFloat(r.querySelector('.exam').value) || 0;
+                    let tdIn = r.querySelector('.td-mark').value.trim();
+                    let subAvg = ex;
+                    if (tdIn !== "") subAvg = (ex * 0.6) + (parseFloat(tdIn) * 0.4);
+                    targetGroupFixedPoints += (subAvg * c);
+                }
+            });
+
+            // 5. النقاط الصافية المطلوبة من المادة الفارغة داخل مجموعتها
+            let pointsNeededFromTargetSubject = pointsNeededFromTargetGroup - targetGroupFixedPoints;
+
             let requiredExamMark = 0;
 
             if (targetTdInput === "") {
@@ -187,22 +244,22 @@ HTML
                 requiredExamMark = pointsNeededFromExamOnly / (targetCoeff * 0.6);
             }
 
-            // إظهار المستشار دائماً
+            // إظهار صندوق المستشار ببياناته الدقيقة المطابقة لنظام الوحدات والمجموعات
             advisorBox.style.display = "block";
             if (requiredExamMark <= 20) {
                 let finalMarkToShow = requiredExamMark < 0 ? 0 : requiredExamMark.toFixed(2);
-                advisorMsg.innerHTML = `في مادة <b style="color:var(--accent);">${targetSubName}</b>: يجب التحصل على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان حتى تتحصل على معدل مقبول.`;
+                advisorMsg.innerHTML = `بناءً على حسابات الوحدات والمجموعات، في مادة <b style="color:var(--accent);">${targetSubName}</b>: يجب الحصول على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان لضمان تحقيق معدل فصلي عام يساوي 10.00.`;
             } else {
-                advisorMsg.innerHTML = `<span class="advisor-alert">حتى نقطة 20 لن تساعدك للنجاح في مادة (${targetSubName}) لرفع المعدل الفصلي إلى 10.</span>`;
+                advisorMsg.innerHTML = `<span class="advisor-alert">حتى لو حصلت على 20 في مادة (${targetSubName}) فلن تتمكن بمفردها من رفع معدل المجموعة والفصل إلى 10، ستحتاج لتعويضها من مجموعات أخرى.</span>`;
             }
         }
 
-        // خطوة 3: عرض النتيجة النهائية للمعدل الفصلي
+        // طباعة المعدل الإجمالي للفصل
         const finalResultBox = document.getElementById('finalResult');
-        if (totalCoefficientsAll > 0) {
-            finalResultBox.innerText = "المعدل الفصلي العام المتوقع: " + finalGPA.toFixed(3) + " من 20";
+        if (totalSemesterCoefficients > 0) {
+            finalResultBox.innerText = "المعدل الفصلي العام المتوقع: " + finalSemesterGPA.toFixed(3) + " من 20";
         } else {
-            finalResultBox.innerText = "يرجى إضافة مجموعات ومواد أولاً وكتابة الدرجات ليتم الحساب!";
+            finalResultBox.innerText = "يرجى إضافة المواد وعلاماتها أولاً!";
         }
     }
 
