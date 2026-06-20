@@ -409,8 +409,7 @@ input[type="text"]:focus, input[type="number"]:focus{
 
 <div class="video-bg">
   <video autoplay muted loop playsinline preload="auto">
-    <source src="my-video.webm" type="video/webm">
-    <source src="./my-video.webm" type="video/webm">
+    <source src="knight_flowers_wind_loop.mp4" type="video/mp4">
   </video>
 </div>
 
@@ -431,7 +430,7 @@ input[type="text"]:focus, input[type="number"]:focus{
         <li><b>تنظيم الوحدات:</b> يعتمد الحساب على نظام المجموعات (الوحدات التعليمية). عدّل اسم كل مجموعة وأضف موادها داخل جدولها.</li>
         <li><b>إدخال المعاملات والنقاط:</b> اكتب اسم المادة (اختياري)، حدد المعامل، وأدخل علامتي الامتحان والـ TD من 0 إلى 20.</li>
         <li><b>المواد بدون TD:</b> اترك خانة الـ TD فارغة تماماً وستُحسب علامة الامتحان بنسبة 100% من معدل المادة.</li>
-        <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله, سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة في ذلك الامتحان لتحقيق معدل فصلي يساوي 10.00.</li>
+        <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله، سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة في ذلك الامتحان لتحقيق معدل فصلي يساوي 10.00.</li>
       </ul>
 
       <div class="guide-image-container">
@@ -492,9 +491,17 @@ input[type="text"]:focus, input[type="number"]:focus{
 <script>
 let groupCount = 0;
 
-// الهندسة الصوتية: تعريف الملفات الصوتية الصحيحة بناءً على المرفوعات
-const successAudio = new Audio('reelsvideo.io_1781973559904.mp3');
+// مصفوفة أغاني النجاح العشوائية (تم تضمين الملفات الصوتية التي أرسلتها للنجاح والفرح)
+const successTracks = [
+    'reelsvideo.io_1781973559904.mp3',
+    'reelsvideo.io_1781978267153.mp3'
+];
+
+// الصوت المخصص للفشل
 const failAudio = new Audio('reelsvideo.io_1781973704823.mp3');
+
+// متغير لتخزين كائن الصوت الحالي المشتغل حتى نتمكن من إيقافه بسهولة
+let currentPlayingAudio = null;
 
 function addGroup() {
     groupCount++;
@@ -603,27 +610,39 @@ function setGauge(value) {
     }
     requestAnimationFrame(step);
 
-    // التحكم بالتشغيل الصوتي الذكي
+    // إيقاف أي صوت مشتغل حالياً لتجنب تداخل الأصوات عند تكرار الحساب
+    stopAllAudio();
+
+    // تشغيل الصوت المناسب بناءً على النتيجة
     if (value >= 10) {
-        successAudio.play().catch(e => console.log("تحذير المتصفح: تفاعل أولاً لتشغيل الصوت", e));
+        // اختيار أغنية بشكل عشوائي تماماً من مصفوفة النجاح
+        const randomIndex = Math.floor(Math.random() * successTracks.length);
+        currentPlayingAudio = new Audio(successTracks[randomIndex]);
+        currentPlayingAudio.play().catch(e => console.log("تفاعل مع الصفحة لتفعيل الصوت العشوائي", e));
     } else {
-        failAudio.play().catch(e => console.log("تحذير المتصفح: تفاعل أولاً لتشغيل الصوت", e));
+        currentPlayingAudio = failAudio;
+        currentPlayingAudio.play().catch(e => console.log("تفاعل مع الصفحة لتفعيل الصوت", e));
     }
 
-    // إظهار الإطار الإعلاني البوب-آب
+    // إظهار اللوحة المنبثقة للنتيجة
     popupOverlay.style.display = 'flex';
 }
 
-// دالة موحدة لتصفير كافة الأصوات وإخفاء الواجهة
+// دالة مخصصة لإيقاف الصوت تماماً وتصفير توقيته
+function stopAllAudio() {
+    if (currentPlayingAudio) {
+        currentPlayingAudio.pause();
+        currentPlayingAudio.currentTime = 0;
+    }
+    failAudio.pause();
+    failAudio.currentTime = 0;
+}
+
+// دالة إغلاق النافذة وتصفير الأصوات
 function closePopupAndStopAudio() {
     const overlay = document.getElementById('resultPopupOverlay');
     overlay.style.display = 'none';
-
-    successAudio.pause();
-    successAudio.currentTime = 0;
-
-    failAudio.pause();
-    failAudio.currentTime = 0;
+    stopAllAudio();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -631,11 +650,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeBtn = document.getElementById('resultPopupClose');
     
     closeBtn.addEventListener('click', closePopupAndStopAudio);
-    
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) closePopupAndStopAudio();
     });
-    
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closePopupAndStopAudio();
     });
