@@ -31,6 +31,7 @@
   --line:#cdc1a0;
   --line-soft:#ddd2b3;
   --muted:#7d7457;
+  --td-blue:#2563a8;
 }
 *{box-sizing:border-box;}
 
@@ -242,7 +243,7 @@ h1{
   background:rgba(255,248,236,0.28);
   -webkit-backdrop-filter:blur(18px);
   backdrop-filter:blur(18px);
-  border:1px solid var(--gold-light); border-radius:10px; padding:20px;
+  border:1px solid var(--gold-light); border-radius:10px; padding:34px 20px 20px;
   display:none; height:fit-content; position:sticky; top:20px;
   box-shadow:0 12px 26px -12px rgba(169,132,47,0.45);
   animation:popIn 0.45s ease;
@@ -251,7 +252,21 @@ h1{
   content:""; position:absolute; top:-9px; right:18px;
   color:var(--gold); background:rgba(255,248,236,0.9); font-size:0.8rem; padding:0 6px;
 }
+.advisor-close{
+  position:absolute; top:10px; left:10px;
+  width:26px; height:26px; border-radius:50%;
+  background:transparent; border:1.5px solid var(--burgundy);
+  color:var(--burgundy); font-size:0.85rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:background .2s, color .2s, transform .15s;
+}
+.advisor-close:hover{ background:var(--burgundy); color:#fff; transform:scale(1.08); }
 @keyframes popIn{ from{opacity:0; transform:translateY(-8px) scale(0.97);} to{opacity:1; transform:translateY(0) scale(1);} }
+
+@media (max-width:900px){
+  .main-layout{ flex-direction:column; }
+  .advisor-area{ width:100%; min-width:0; position:static; }
+}
 
 .advisor-title{
   font-family:'Cormorant Garamond',serif; font-weight:700; color:var(--burgundy); font-size:1.15rem;
@@ -289,7 +304,8 @@ h1{
 }
 .group-title-input:focus{ outline:none; border-bottom:1px solid var(--gold); }
 
-table{ width:100%; border-collapse:collapse; margin-top:14px; margin-bottom:16px; }
+.table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table{ width:100%; min-width:560px; border-collapse:collapse; margin-top:14px; margin-bottom:10px; }
 th,td{ border:1px solid var(--line-soft); padding:11px 8px; text-align:center; font-size:0.9rem; }
 th{ background:rgba(230,220,192,0.92); color:var(--ink); font-weight:700; font-size:0.84rem; letter-spacing:0.01em; }
 tbody tr{ transition:background 0.2s; }
@@ -306,9 +322,64 @@ input[type="text"]:focus, input[type="number"]:focus{
   background:#fff;
 }
 
-.group-summary{
-  font-size:0.87rem; color:var(--muted); text-align:left; margin-top:8px; font-weight:700;
+/* ---- Optional per-subject TD toggle ---- */
+.td-cell{ padding:6px !important; min-width:96px; }
+.td-toggle-btn{
+  background:rgba(37,99,168,0.07);
+  border:1.5px solid var(--td-blue);
+  color:var(--td-blue);
+  border-radius:6px;
+  padding:7px 10px;
+  font-size:0.78rem;
+  font-weight:700;
   font-family:'Cairo',sans-serif;
+  cursor:pointer;
+  transition:background .2s, color .2s, transform .15s;
+  white-space:nowrap;
+}
+.td-toggle-btn:hover{ background:var(--td-blue); color:#fff; transform:translateY(-1px); }
+.td-input-group{ display:none; align-items:center; gap:6px; justify-content:center; }
+.td-input-group input{ width:60px !important; min-width:0; }
+.td-remove-btn{
+  background:transparent; border:1.5px solid var(--danger); color:var(--danger);
+  border-radius:6px; width:26px; height:26px; font-size:0.8rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition:background .2s, color .2s;
+}
+.td-remove-btn:hover{ background:var(--danger); color:#fff; }
+
+/* one-time info toast about TD behavior */
+.td-info-toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  z-index:1100; max-width:360px; width:90%;
+  background:linear-gradient(160deg,var(--ink),var(--ink-2));
+  color:#f1e9d2; border:1px solid var(--gold-light);
+  border-radius:12px; padding:14px 18px; font-size:0.85rem; line-height:1.65;
+  box-shadow:0 20px 50px -15px rgba(0,0,0,.6);
+  opacity:0; transition:opacity .3s ease, transform .3s ease;
+  display:none;
+}
+.td-info-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+.group-summary{
+  display:none;
+  font-size:0.76rem; color:var(--muted); text-align:left; margin-top:6px; font-weight:400;
+  font-family:'Cairo',sans-serif; opacity:0.8;
+}
+
+/* ---- Missing-fields warning, shown under the last group's table ---- */
+.empty-fields-warning{
+  display:none;
+  margin:8px 0 0;
+  background:rgba(140,47,35,0.12);
+  border:1px solid rgba(140,47,35,0.4);
+  color:var(--danger);
+  border-radius:8px;
+  padding:13px 16px;
+  font-size:0.88rem;
+  font-weight:700;
+  line-height:1.7;
+  animation:fadeUp 0.3s ease;
 }
 
 .result-section{ margin:34px 30px 0; display:flex; flex-direction:column; align-items:center; gap:10px; }
@@ -395,14 +466,6 @@ input[type="text"]:focus, input[type="number"]:focus{
 @media (prefers-reduced-motion: reduce){
   .result-popup-overlay, .result-popup-card{ animation:none !important; }
 }
-@media (max-width:680px){
-  .top-actions, .main-layout, .guide-wrap, .result-section{ margin-left:14px; margin-right:14px; }
-  .hero{ padding:36px 18px 28px; }
-}
-
-@media (prefers-reduced-motion: reduce){
-  *{ animation:none !important; transition:none !important; }
-}
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
   .container{ background:rgba(251,247,236,0.94); }
@@ -443,6 +506,74 @@ input[type="text"]:focus, input[type="number"]:focus{
 @media (prefers-reduced-motion: reduce){
   .lightbox-overlay, .lightbox-overlay img{ animation:none !important; }
 }
+
+/* ---- Scroll-down cloud hint ---- */
+.scroll-cloud{
+  position:fixed; top:16px; left:50%;
+  transform:translateX(-50%) translateY(-14px) scale(0.9);
+  z-index:1050;
+  opacity:0; pointer-events:none;
+  transition:opacity .35s ease, transform .35s ease;
+  max-width:92vw;
+}
+.scroll-cloud.visible{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); pointer-events:auto; }
+.cloud-shape{
+  position:relative;
+  background:#fffdf7;
+  color:var(--ink);
+  font-family:'Cairo',sans-serif; font-weight:700; font-size:0.82rem;
+  padding:13px 22px;
+  border-radius:999px;
+  box-shadow:0 14px 34px -10px rgba(0,0,0,.4), 0 0 0 1px rgba(169,132,47,.3);
+  cursor:pointer;
+  white-space:nowrap;
+  animation:cloudFloat 2.4s ease-in-out infinite;
+  display:flex; align-items:center; gap:8px;
+}
+.cloud-shape::before, .cloud-shape::after{
+  content:""; position:absolute; background:#fffdf7;
+  border-radius:50%;
+  box-shadow:0 0 0 1px rgba(169,132,47,.18);
+}
+.cloud-shape::before{ width:22px; height:22px; top:-9px; right:22%; }
+.cloud-shape::after{ width:15px; height:15px; top:-6px; right:34%; }
+@keyframes cloudFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+@media (max-width:480px){
+  .cloud-shape{ font-size:0.74rem; padding:11px 16px; white-space:normal; text-align:center; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .scroll-cloud, .cloud-shape{ animation:none !important; }
+}
+
+/* ===========================================================
+   Mobile refinements
+=========================================================== */
+@media (max-width:680px){
+  body{ padding:20px 8px 50px; }
+  .top-actions, .main-layout, .guide-wrap, .result-section{ margin-left:10px; margin-right:10px; }
+  .hero{ padding:30px 16px 24px; }
+  h1{ font-size:1.45rem; }
+  .subtitle{ font-size:0.84rem; }
+  .guide-box{ padding:15px 16px; font-size:0.85rem; }
+  .guide-title{ font-size:1.05rem; }
+  .group-box{ padding:14px; }
+  .group-title-input{ font-size:1.05rem; width:55%; }
+  table{ min-width:520px; }
+  th,td{ padding:7px 5px; font-size:0.76rem; }
+  input[type="text"], input[type="number"]{ font-size:0.82rem; padding:6px; }
+  .btn{ font-size:0.8rem; padding:9px 14px; }
+  .btn-calc{ font-size:1rem; padding:14px; }
+  .td-toggle-btn{ font-size:0.7rem; padding:6px 8px; }
+  .seal-wrap{ width:140px; height:140px; }
+  .seal-inner{ width:112px; height:112px; }
+  .seal-value{ font-size:2rem; }
+  .result-popup-card{ padding:30px 20px 24px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; }
+}
 </style>
 </head>
 <body>
@@ -451,6 +582,18 @@ input[type="text"]:focus, input[type="number"]:focus{
   <video autoplay muted loop playsinline preload="auto">
     <source src="knight_flowers_wind_loop.mp4" type="video/mp4">
   </video>
+</div>
+
+<!-- Scroll-down cloud hint -->
+<div class="scroll-cloud" id="scrollCloud">
+  <div class="cloud-shape" onclick="scrollToCalcButton(event)">
+    ⬇️ انزل واضغط على "احسب المعدل الفصلي"
+  </div>
+</div>
+
+<!-- One-time TD info toast -->
+<div class="td-info-toast" id="tdInfoToast">
+  لقد أضفت نقطة TD لهذه المادة. إذا تركتها فارغة ستُحسب كـ 0. يمكنك حذف هذه الخانة بزر 🗑 إن لم تكن المادة تحتوي TD خاص بها.
 </div>
 
 <div class="container">
@@ -468,8 +611,8 @@ input[type="text"]:focus, input[type="number"]:focus{
       <div class="guide-title">📖 دليل الاستخدام وطريقة إدخال العلامات:</div>
       <ul class="guide-list">
         <li><b>تنظيم الوحدات:</b> يعتمد الحساب على نظام المجموعات (الوحدات التعليمية). عدّل اسم كل مجموعة وأضف موادها داخل جدولها.</li>
-        <li><b>إدخال المعاملات والنقاط:</b> اكتب اسم المادة (اختياري)، حدد المعامل، وأدخل علامتي الامتحان والـ TD من 0 إلى 20.</li>
-        <li><b>المواد بدون TD:</b> اترك خانة الـ TD فارغة تماماً وستُحسب علامة الامتحان بنسبة 100% من معدل المادة.</li>
+        <li><b>إدخال المعاملات والنقاط:</b> اكتب اسم المادة (اختياري)، حدد المعامل، وأدخل علامة الامتحان من 0 إلى 20.</li>
+        <li><b>نقطة TD اختيارية:</b> إن كانت المادة تحتوي على أعمال موجهة (TD)، اضغط زر "➕ إضافة TD" في خانتها وأدخل العلامة. إن لم تضغط الزر، ستُحسب علامة الامتحان بنسبة 100% من معدل المادة.</li>
         <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله، سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة في ذلك الامتحان لتحقيق معدل فصلي يوازي 10.00.</li>
       </ul>
 
@@ -484,8 +627,12 @@ input[type="text"]:focus, input[type="number"]:focus{
   </div>
 
   <div class="main-layout">
-    <div class="content-area" id="groupsContainer"></div>
+    <div class="content-area">
+      <div id="groupsContainer"></div>
+      <div class="empty-fields-warning" id="emptyFieldsWarning"></div>
+    </div>
     <div class="advisor-area" id="advisorContainer">
+      <button class="advisor-close" id="advisorClose" aria-label="إغلاق" onclick="document.getElementById('advisorContainer').style.display='none'">✕</button>
       <div class="advisor-title">💡 المستشار الأكاديمي المصيري</div>
       <div class="advisor-msg" id="advisorMessage"></div>
     </div>
@@ -560,18 +707,20 @@ function addGroup() {
                 <button class="btn btn-danger" onclick="removeElement('group_${groupCount}')">حذف المجموعة ❌</button>
             </div>
             <button class="btn btn-add" style="font-size:0.85rem;" onclick="addSubject(${groupCount})">➕ إضافة مادة</button>
+            <div class="table-scroll">
             <table>
                 <thead>
                     <tr>
                         <th>اسم المادة (اختياري)</th>
                         <th>المعامل</th>
                         <th>نقطة الامتحان</th>
-                        <th>نقطة الـ TD (اتركها فارغة إن لم يوجد)</th>
+                        <th>نقطة TD (اختياري)</th>
                         <th>إجراء</th>
                     </tr>
                 </thead>
                 <tbody id="subject_body_${groupCount}"></tbody>
             </table>
+            </div>
             <div class="group-summary" id="group_summary_${groupCount}">معدل المجموعة الحالي: -- | معامل المجموعة الكلي: --</div>
         </div>
     `;
@@ -592,7 +741,13 @@ function addSubject(groupId) {
             <td><input type="text" placeholder="اسم المادة" class="sub-name"></td>
             <td><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1"></td>
             <td><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20"></td>
-            <td><input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="0-20"></td>
+            <td class="td-cell">
+                <button type="button" class="td-toggle-btn" onclick="enableTD(this)">➕ إضافة TD</button>
+                <div class="td-input-group">
+                    <input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="0-20">
+                    <button type="button" class="td-remove-btn" onclick="disableTD(this)" title="حذف نقطة TD">🗑</button>
+                </div>
+            </td>
             <td><button class="btn btn-danger" style="padding:4px 10px;" onclick="removeElement('${rowId}')">حذف</button></td>
         </tr>
     `;
@@ -606,6 +761,95 @@ function removeElement(id) {
     el.style.opacity = '0';
     el.style.transform = 'translateX(8px)';
     setTimeout(() => el.remove(), 220);
+}
+
+/* ---- Optional per-subject TD toggle ---- */
+let tdInfoShown = false;
+
+function enableTD(btn) {
+    const cell = btn.closest('.td-cell');
+    const group = cell.querySelector('.td-input-group');
+    btn.style.display = 'none';
+    group.style.display = 'flex';
+    const input = group.querySelector('.td-mark');
+    input.focus();
+
+    if (!tdInfoShown) {
+        tdInfoShown = true;
+        showTdInfoToast();
+    }
+}
+
+function disableTD(btn) {
+    const cell = btn.closest('.td-cell');
+    const group = cell.querySelector('.td-input-group');
+    const input = group.querySelector('.td-mark');
+    input.value = '';
+    group.style.display = 'none';
+    cell.querySelector('.td-toggle-btn').style.display = 'inline-flex';
+}
+
+function showTdInfoToast() {
+    const toast = document.getElementById('tdInfoToast');
+    toast.style.display = 'block';
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => { toast.style.display = 'none'; }, 300);
+    }, 6000);
+}
+
+/* ---- Scroll-down cloud hint (repeats every 10s) ---- */
+let examFirstFilled = false;
+let cloudDebounceTimer = null;
+let cloudAutoHideTimer = null;
+let cloudRepeatInterval = null;
+
+document.addEventListener('input', function (e) {
+    if (!e.target.classList.contains('exam')) return;
+    if (examFirstFilled) return;
+
+    const val = e.target.value.trim();
+    clearTimeout(cloudDebounceTimer);
+    cloudDebounceTimer = setTimeout(() => {
+        if (examFirstFilled) return;
+        if (val !== '') {
+            examFirstFilled = true;
+            showScrollCloud();
+            cloudRepeatInterval = setInterval(showScrollCloud, 10000);
+        }
+    }, 1000);
+});
+
+function stopCloudReminders() {
+    clearInterval(cloudRepeatInterval);
+    hideScrollCloud();
+}
+
+function showScrollCloud() {
+    const cloud = document.getElementById('scrollCloud');
+    cloud.classList.add('visible');
+    clearTimeout(cloudAutoHideTimer);
+    cloudAutoHideTimer = setTimeout(hideScrollCloud, 4000);
+}
+
+function hideScrollCloud() {
+    document.getElementById('scrollCloud').classList.remove('visible');
+    clearTimeout(cloudAutoHideTimer);
+}
+
+document.addEventListener('click', function (e) {
+    const cloud = document.getElementById('scrollCloud');
+    if (cloud.classList.contains('visible') && !cloud.contains(e.target)) {
+        hideScrollCloud();
+    }
+});
+
+function scrollToCalcButton(e) {
+    if (e) e.stopPropagation();
+    hideScrollCloud();
+    const btn = document.querySelector('.btn-calc');
+    if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function setGauge(value) {
@@ -639,7 +883,7 @@ function setGauge(value) {
     ringPopup.style.setProperty('--ring-color', ringColor);
     popupCaption.innerHTML = value >= 10
         ? '🎉 تهانينا، معدلك الفصلي مقبول!'
-        : 'معدلك لا يزال دون 10 — راجع المستشار الأكاديمي للتفاصيل.';
+        : 'معدلك الفصلي لا يزال دون 10.00.';
 
     let start = null;
     const from = parseFloat(valEl.dataset.last || '0');
@@ -713,12 +957,17 @@ function closeLightbox() {
 }
 
 function calculateSemesterGPA() {
+    stopCloudReminders();
     const groupBoxes = document.querySelectorAll('.group-box');
     let totalWeightedGroupAverages = 0;
     let totalSemesterCoefficients = 0;
     let emptyExamsCount = 0;
     let targetRow = null;
     let targetGroupId = null;
+
+    let missingExamCount = 0;
+    let missingCoeffCount = 0;
+    let missingTDCount = 0;
 
     const advisorBox = document.getElementById('advisorContainer');
     const advisorMsg = document.getElementById('advisorMessage');
@@ -729,13 +978,35 @@ function calculateSemesterGPA() {
         const rows = box.querySelectorAll('.subject-row');
         rows.forEach(row => {
             let examInput = row.querySelector('.exam').value.trim();
+            let coeffInput = row.querySelector('.coeff').value.trim();
+            let tdGroup = row.querySelector('.td-input-group');
+            let tdActive = tdGroup && tdGroup.style.display === 'flex';
+            let tdInput = row.querySelector('.td-mark').value.trim();
+
             if (examInput === "") {
                 emptyExamsCount++;
                 targetRow = row;
                 targetGroupId = gId;
+                missingExamCount++;
             }
+            if (coeffInput === "") missingCoeffCount++;
+            if (tdActive && tdInput === "") missingTDCount++;
         });
     });
+
+    // show / hide the missing-fields warning under the last group's table
+    const warningDiv = document.getElementById('emptyFieldsWarning');
+    const issues = [];
+    if (missingExamCount > 0) issues.push(`خانة الامتحان (${missingExamCount})`);
+    if (missingCoeffCount > 0) issues.push(`خانة المعامل (${missingCoeffCount})`);
+    if (missingTDCount > 0) issues.push(`خانة TD (${missingTDCount})`);
+    if (issues.length > 0) {
+        warningDiv.style.display = 'block';
+        warningDiv.innerHTML = `⚠️ لاحظنا أنك تركت بعض الخانات فارغة: ${issues.join('، ')}. تأكد من تعبئتها للحصول على نتيجة دقيقة.`;
+    } else {
+        warningDiv.style.display = 'none';
+        warningDiv.innerHTML = '';
+    }
 
     groupBoxes.forEach(box => {
         const gId = box.id.split('_')[1];
@@ -763,7 +1034,9 @@ function calculateSemesterGPA() {
         });
 
         let groupAverage = groupCoeffSum > 0 ? (groupPointsSum / groupCoeffSum) : 0;
-        document.getElementById(`group_summary_${gId}`).innerText = `معدل المجموعة الحالي: ${groupAverage.toFixed(2)} | معامل المجموعة الكلي: ${groupCoeffSum}`;
+        const summaryEl = document.getElementById(`group_summary_${gId}`);
+        summaryEl.innerText = `معدل المجموعة الحالي: ${groupAverage.toFixed(2)} | معامل المجموعة الكلي: ${groupCoeffSum}`;
+        summaryEl.style.display = 'block';
 
         totalWeightedGroupAverages += (groupAverage * groupCoeffSum);
         totalSemesterCoefficients += groupCoeffSum;
@@ -823,7 +1096,7 @@ function calculateSemesterGPA() {
         advisorBox.style.display = "block";
         if (requiredExamMark <= 20) {
             let finalMarkToShow = requiredExamMark < 0 ? 0 : requiredExamMark.toFixed(2);
-            advisorMsg.innerHTML = `بناءً على حسابات الوحدات والمجموعات، في مادة <b style="color:var(--ink-2);">${targetSubName}</b>: يجب الحصول على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان لضمان تحقيق معدل فصلي عام عام يساوي 10.00.`;
+            advisorMsg.innerHTML = `بناءً على حسابات الوحدات والمجموعات، في مادة <b style="color:var(--ink-2);">${targetSubName}</b>: يجب الحصول على <b style="color:var(--success); font-size:1.1rem;">(${finalMarkToShow})</b> في الامتحان لضمان تحقيق معدل فصلي عام يساوي 10.00.`;
         } else {
             advisorMsg.innerHTML = `<span class="advisor-alert">حتى لو حصلت على 20 في مادة (${targetSubName}) فلن تتمكن بمفردها من رفع المعدل إلى 10، ستحتاج لتعويضها من مجموعات أخرى.</span>`;
         }
