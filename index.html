@@ -309,12 +309,20 @@ h1{
 }
 .group-title-input:focus{ outline:none; border-bottom:1px solid var(--gold); }
 
+/* إعدادات الجدول الافتراضية العريضة للحاسوب */
 table{ width:100%; border-collapse:collapse; margin-top:14px; margin-bottom:10px; table-layout: fixed; }
 th,td{ border:1px solid var(--line-soft); padding:11px 8px; text-align:center; font-size:0.9rem; }
 th{ background:rgba(230,220,192,0.92); color:var(--ink); font-weight:700; font-size:0.84rem; letter-spacing:0.01em; }
-tbody tr{ transition:background 0.2s; }
+tbody tr{ transition:background 0.2s; position: relative; }
 tbody tr:nth-child(odd){ background:rgba(248,243,230,0.65); }
 tbody tr:hover{ background:rgba(240,230,203,0.85); }
+
+/* التحكم في عرض أعمدة الجدول الأصلي على الحواسب */
+th:nth-child(1), td:nth-child(1) { width: 32%; } /* اسم المادة */
+th:nth-child(2), td:nth-child(2) { width: 14%; } /* المعامل */
+th:nth-child(3), td:nth-child(3) { width: 18%; } /* الامتحان */
+th:nth-child(4), td:nth-child(4) { width: 22%; } /* الـ TD */
+th:nth-child(5), td:nth-child(5) { width: 14%; } /* الحذف */
 
 input[type="text"], input[type="number"]{
   width:95%; padding:8px; border:1px solid var(--line); border-radius:4px;
@@ -327,7 +335,6 @@ input[type="text"]:focus, input[type="number"]:focus{
   background:#fff;
 }
 
-/* ---- Optional per-subject TD toggle ---- */
 .td-cell{ padding:6px !important; }
 .td-toggle-btn{
   background:rgba(37,99,168,0.07);
@@ -354,7 +361,6 @@ input[type="text"]:focus, input[type="number"]:focus{
 }
 .td-remove-btn:hover{ background:var(--danger); color:#fff; }
 
-/* one-time info toast about TD behavior */
 .td-info-toast{
   position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
   z-index:1100; max-width:360px; width:90%;
@@ -373,7 +379,6 @@ input[type="text"]:focus, input[type="number"]:focus{
   font-family:'Cairo',sans-serif; opacity:0.8;
 }
 
-/* ---- Missing-fields warning, shown under the last group's table ---- */
 .empty-fields-warning{
   display:none;
   margin:8px 0 0;
@@ -473,7 +478,6 @@ input[type="text"]:focus, input[type="number"]:focus{
   .result-popup-overlay, .result-popup-card{ animation:none !important; }
 }
 
-/* ---- Fullscreen image lightbox ---- */
 .lightbox-overlay{
   position:fixed; inset:0; z-index:1000;
   background:rgba(8,9,16,0.92);
@@ -503,7 +507,6 @@ input[type="text"]:focus, input[type="number"]:focus{
 }
 .lightbox-close:hover{ transform:scale(1.1) rotate(90deg); background:var(--burgundy); }
 
-/* ---- Scroll-down cloud hint ---- */
 .scroll-cloud{
   position:fixed; top:16px; left:50%;
   transform:translateX(-50%) translateY(-14px) scale(0.9);
@@ -536,86 +539,76 @@ input[type="text"]:focus, input[type="number"]:focus{
 @keyframes cloudFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
 
 /* ====================================================================
-   🔥 محرك الاستجابة الشامل والهندسة الصارمة للهواتف (Responsive Engine)
+   💎 التعديل السحري للأجهزة المحمولة: جدول أفقي ثابت 100% وبدون أي سحب!
 ==================================================================== */
 @media (max-width:767px){
-  body{ padding:16px 8px 40px; width: 100vw; }
+  body{ padding:16px 6px 40px; width: 100vw; }
   .container{ width: 100% !important; border-radius: 8px; padding: 0 0 30px; margin: 0; }
-  .container::before { inset: 5px; }
-  .top-actions, .guide-wrap, .result-section{ margin-left:8px; margin-right:8px; width: calc(100% - 16px); }
-  .hero{ padding:30px 16px 24px; }
-  h1{ font-size:1.45rem; }
-  .subtitle{ font-size:0.84rem; }
-  .guide-box{ padding:15px 16px; font-size:0.85rem; width: 100%; }
-  .guide-image{ width: 100%; max-width: 280px; }
+  .container::before { inset: 4px; }
+  .top-actions, .guide-wrap, .result-section{ margin-left:6px; margin-right:6px; width: calc(100% - 12px); }
+  .hero{ padding:26px 12px 20px; }
+  h1{ font-size:1.35rem; }
+  .subtitle{ font-size:0.82rem; }
   
-  /* تدمير الهيكل التقليدي للجداول لمنع أي خروج عن الشاشة نهائياً */
-  .group-box{ padding:12px; margin-bottom: 20px; width: calc(100% - 16px); margin-right: 8px; margin-left: 8px; }
-  .group-header { flex-direction: column; align-items: stretch; gap: 10px; width: 100%; }
-  .group-title-input{ font-size:1.1rem; width:100% !important; text-align:center; margin-bottom: 4px; }
-  .group-header .btn-danger { width: 100% !important; margin: 0; padding: 10px; }
+  /* الحفاظ على الصناديق والمجموعات بكامل عرض الشاشة مخصومة الهوامش */
+  .group-box{ padding:10px 6px; margin-bottom: 16px; width: calc(100% - 12px); margin-right: 6px; margin-left: 6px; }
+  .group-header { gap: 6px; margin-bottom: 12px; }
+  .group-title-input{ font-size:1.05rem; width:65%; }
+  .group-header .btn-danger { padding: 5px 8px; font-size: 0.72rem; }
   
-  /* تحويل الجدول والأسطر إلى عناصر بلوك مرنة بنسبة 100% */
-  table { display: block !important; width: 100% !important; table-layout: auto !important; }
-  thead { display: none !important; } 
-  tbody { display: block !important; width: 100% !important; }
+  /* فرض الإبقاء على مظهر الجدول الأفقي بالكامل للحواسب */
+  table { display: table !important; width: 100% !important; table-layout: fixed !important; }
+  thead { display: table-header-group !important; }
+  tbody { display: table-row-group !important; }
+  tbody tr { display: table-row !important; padding: 0 !important; margin: 0 !important; background: none !important; border: none !important; box-shadow: none !important; }
+  th, td { display: table-cell !important; padding: 6px 2px !important; font-size: 0.72rem !important; border: 1px solid var(--line-soft) !important; }
   
-  tbody tr {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    background: rgba(248, 243, 230, 0.5) !important;
-    border: 1px solid var(--line) !important;
-    border-radius: 8px !important;
-    padding: 10px !important;
-    margin-bottom: 16px !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-  }
-  
-  /* هندسة الخانات لتأخذ كامل عرض البطاقة وتظهر التسمية على اليمين */
-  td {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    padding: 9px 4px !important;
-    border: none !important;
-    border-bottom: 1px dashed rgba(205, 193, 160, 0.4) !important;
-    text-align: right !important;
-  }
-  td:last-child { border-bottom: none !important; justify-content: center !important; padding-top: 12px !important; }
-  
-  /* حقن التسميات تلقائياً عبر خاصية data-label لجعل التصميم عمودياً */
-  td::before {
-    content: attr(data-label);
-    font-weight: 700;
-    color: var(--ink-2);
-    font-size: 0.85rem;
-    margin-left: 10px;
-    flex-shrink: 0;
-  }
-  td:last-child::before { display: none !important; }
-  
-  /* إصلاح أحجام المدخلات لتتناسب مع البطاقات الجديدة بنسبة 100% */
+  /* توزيع الأعمدة بدقة بالغة بالـ % لتملأ عرض الهاتف الصغير بالضبط */
+  th:nth-child(1), td:nth-child(1) { width: 33% !important; } /* اسم المادة */
+  th:nth-child(2), td:nth-child(2) { width: 12% !important; } /* المعامل */
+  th:nth-child(3), td:nth-child(3) { width: 17% !important; } /* الامتحان */
+  th:nth-child(4), td:nth-child(4) { width: 26% !important; } /* الـ TD */
+  th:nth-child(5), td:nth-child(5) { width: 12% !important; } /* الحذف */
+
+  /* إزالة أي مسميات جانبية مضافة سابقاً قد تخرب التصميم */
+  td::before { display: none !important; }
+
+  /* تقليص أحجام الفراغات والخطوط داخل حقول الإدخال لتناسب المساحة الدقيقة */
   input[type="text"], input[type="number"] {
-    width: 60% !important;
-    max-width: 180px !important;
-    padding: 7px !important;
-    font-size: 0.88rem !important;
+    width: 100% !important;
+    padding: 5px 2px !important;
+    font-size: 0.76rem !important;
+    border-radius: 3px !important;
+  }
+  input[type="text"]::placeholder { font-size: 0.7rem; text-align: center; }
+
+  /* تكييف خلية الـ TD التفاعلية لتصبح رشيقة جداً داخل عمودها الصغير */
+  .td-cell { padding: 4px 1px !important; }
+  .td-toggle-btn { width: 95% !important; padding: 4px 1px !important; font-size: 0.64rem !important; border-radius: 4px; }
+  .td-input-group { gap: 2px !important; }
+  .td-input-group input { width: 68% !important; padding: 4px 1px !important; font-size: 0.74rem !important; }
+  .td-remove-btn { width: 20px !important; height: 20px !important; font-size: 0.68rem !important; border-radius: 3px; }
+
+  /* زر حذف المادة الفردي */
+  td:last-child .btn-danger {
+    width: 90% !important;
+    height: 24px;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    font-size: 0.7rem !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
   }
   
-  .td-cell { justify-content: space-between !important; }
-  .td-toggle-btn { margin: 0; width: 60% !important; max-width: 180px !important; text-align: center; justify-content: center; }
-  .td-input-group { width: 60% !important; max-width: 180px !important; justify-content: flex-end; }
-  .td-input-group input { width: 75% !important; }
+  .btn { font-size: 0.84rem; padding: 10px; width: 100% !important; justify-content: center; margin: 4px 0 !important; }
+  .btn-calc { font-size: 1rem; padding: 14px; margin-top: 18px; width: 100% !important; }
   
-  .btn { font-size: 0.88rem; padding: 11px; width: 100% !important; justify-content: center; margin: 5px 0 !important; }
-  .btn-calc { font-size: 1.05rem; padding: 15px; margin-top: 20px; width: 100% !important; }
-  
-  .seal-wrap { width: 140px; height: 140px; }
-  .seal-inner { width: 112px; height: 112px; }
-  .seal-value { font-size: 2rem; }
-  .result-popup-card { padding: 30px 20px 24px; width: 95%; }
+  .seal-wrap { width: 130px; height: 130px; }
+  .seal-inner { width: 104px; height: 104px; }
+  .seal-value { font-size: 1.8rem; }
+  .result-popup-card { padding: 26px 16px 20px; width: 95%; }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
@@ -640,7 +633,7 @@ input[type="text"]:focus, input[type="number"]:focus{
 </div>
 
 <div class="td-info-toast" id="tdInfoToast">
-  لقد أضفت نقطة TD لهذه المادة. إذا تركتها فارغة ستُحسب كـ 0. يمكنك حذف هذه الخانة بزر 🗑 إن لم تكن المادة تحتوي TD خاص بها.
+  لقد أضفت نقطة TD لهذه المادة. إذا تركتها فارغة ستُحسب كـ 0.
 </div>
 
 <div class="container">
@@ -649,7 +642,7 @@ input[type="text"]:focus, input[type="number"]:focus{
     <div class="hero-crest">🎓</div>
     <span class="hero-eyebrow"><span class="dot"></span> نظام LMD &middot; حساب وحدات ومجموعات</span>
     <h1>حاسبة المعدل الجامعي</h1>
-    <p class="subtitle">احسب معدل كل وحدة تعليمية على حدة، ثم المعدل الفصلي العام — مع مستشار أكاديمي يخبرك بالعلامة التي تحتاجها بالضبط.</p>
+    <p class="subtitle">احسب معدل كل وحدة تعليمية على حدة، ثم المعدل الفصلي العام بلمسة ذكية رشيقة.</p>
     <div class="hero-rule"></div>
   </div>
 
@@ -657,10 +650,9 @@ input[type="text"]:focus, input[type="number"]:focus{
     <div class="guide-box">
       <div class="guide-title">📖 دليل الاستخدام وطريقة إدخال العلامات:</div>
       <ul class="guide-list">
-        <li><b>تنظيم الوحدات:</b> يعتمد الحساب على نظام المجموعات (الوحدات التعليمية). عدّل اسم كل مجموعة وأضف موادها داخل جدولها.</li>
-        <li><b>إدخال المعاملات والنقاط:</b> اكتب اسم المادة (اختياري)، حدد المعامل، وأدخل علامة الامتحان من 0 إلى 20.</li>
-        <li><b>نقطة TD اختيارية:</b> إن كانت المادة تحتوي على أعمال موجهة (TD)، اضغط زر "➕ إضافة TD" في خانتها وأدخل العلامة. إن لم تضغط الزر، ستُحسب علامة الامتحان بنسبة 100% من معدل المادة.</li>
-        <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله, سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة في ذلك الامتحان لتحقيق معدل فصلي يوازي 10.00.</li>
+        <li><b>تنظيم الوحدات:</b> يعتمد الحساب على نظام المجموعات. عدّل اسم كل مجموعة وأضف موادها.</li>
+        <li><b>نقطة TD اختيارية:</b> إن كانت المادة تحتوي على أعمال موجهة (TD)، اضغط زر "➕ إضافة TD" في خانتها وأدخل العلامة.</li>
+        <li><b>المستشار الأكاديمي الذكي:</b> إذا تُرِك امتحان مادة واحدة فقط فارغاً في الجدول كله, سيظهر المستشار تلقائياً ليخبرك بالعلامة الدقيقة المطلوبة.</li>
       </ul>
 
       <div class="guide-image-container">
@@ -746,11 +738,11 @@ function addGroup() {
             <table>
                 <thead>
                     <tr>
-                        <th>اسم المادة (اختياري)</th>
-                        <th>المعامل</th>
-                        <th>نقطة الامتحان</th>
-                        <th>نقطة TD (اختياري)</th>
-                        <th>إجراء</th>
+                        <th>المادة</th>
+                        <th>معامل</th>
+                        <th>إمتحان</th>
+                        <th>تطبيق (TD)</th>
+                        <th>حذف</th>
                     </tr>
                 </thead>
                 <tbody id="subject_body_${groupCount}"></tbody>
@@ -773,17 +765,17 @@ function addSubject(groupId) {
     
     const rowHtml = `
         <tr id="${rowId}" class="subject-row">
-            <td data-label="اسم المادة"><input type="text" placeholder="اسم المادة" class="sub-name"></td>
-            <td data-label="المعامل"><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1"></td>
-            <td data-label="نقطة الامتحان"><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20"></td>
-            <td data-label="نقطة TD" class="td-cell">
-                <button type="button" class="td-toggle-btn" onclick="enableTD(this)">➕ إضافة TD</button>
+            <td><input type="text" placeholder="اسم المادة" class="sub-name"></td>
+            <td><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1"></td>
+            <td><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20"></td>
+            <td class="td-cell">
+                <button type="button" class="td-toggle-btn" onclick="enableTD(this)">➕ TD</button>
                 <div class="td-input-group">
                     <input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="0-20">
-                    <button type="button" class="td-remove-btn" onclick="disableTD(this)" title="حذف نقطة TD">🗑</button>
+                    <button type="button" class="td-remove-btn" onclick="disableTD(this)" title="حذف">🗑</button>
                 </div>
             </td>
-            <td><button class="btn btn-danger" style="padding:6px 12px; width: auto;" onclick="removeElement('${rowId}')">حذف المادة 🗑</button></td>
+            <td><button class="btn btn-danger" onclick="removeElement('${rowId}')">🗑</button></td>
         </tr>
     `;
     tbody.insertAdjacentHTML('beforeend', rowHtml);
