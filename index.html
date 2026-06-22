@@ -28,6 +28,7 @@
   --gold-foil:linear-gradient(135deg,#9c7a35,#e3c476 40%,#a9842f 60%,#f0d999);
   --success:#356b45;
   --danger:#8c2f23;
+  --danger-bright:#d93829;
   --line:#cdc1a0;
   --line-soft:#ddd2b3;
   --muted:#7d7457;
@@ -236,6 +237,22 @@ h1{
 .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(140,47,35,0.35); padding:6px 13px; font-size:0.8rem; border-radius:4px; }
 .btn-danger:hover{ background:rgba(140,47,35,0.07); }
 
+.btn-reset-group{
+  background: linear-gradient(135deg, var(--danger-bright), #a61c11);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 5px;
+  box-shadow: 0 4px 10px rgba(217,56,41,0.25);
+  animation: pulseReset 3s infinite;
+}
+.btn-reset-group:hover{ background: #b82418; box-shadow: 0 6px 14px rgba(217,56,41,0.4); }
+@keyframes pulseReset {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); box-shadow: 0 4px 14px rgba(217,56,41,0.45); }
+}
+
 .top-actions{ text-align:left; margin:24px 30px 0; }
 
 .main-layout{ display:flex; gap:24px; flex-wrap:wrap; margin:20px 30px 0; width: calc(100% - 60px); }
@@ -305,9 +322,13 @@ h1{
 .group-title-input{
   font-family:'Cormorant Garamond',serif; font-size:1.25rem; font-weight:700;
   border:none; background:transparent; color:var(--ink);
-  border-bottom:1px dashed var(--gold); width:60%; padding:2px 0;
+  border-bottom:1px dashed var(--gold); width:45%; padding:2px 0;
 }
 .group-title-input:focus{ outline:none; border-bottom:1px solid var(--gold); }
+
+.group-actions-header {
+  display: flex; gap: 8px; align-items: center;
+}
 
 table{ width:100%; border-collapse:collapse; margin-top:14px; margin-bottom:10px; table-layout: fixed; }
 th,td{ border:1px solid var(--line-soft); padding:11px 8px; text-align:center; font-size:0.9rem; }
@@ -472,8 +493,28 @@ input[type="text"]:focus, input[type="number"]:focus{
   font-size:0.92rem; color:var(--ink-2); margin-top:16px; line-height:1.6; font-weight:600;
 }
 
+/* نافذة استرجاع البيانات المحفوظة */
+.restore-popup-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(13,16,28,0.7);
+  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.restore-popup-card {
+  background: linear-gradient(165deg, var(--paper-2), var(--paper));
+  border: 2px solid var(--gold); border-radius: 14px;
+  padding: 30px 24px; max-width: 400px; width: 100%; text-align: center;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+  animation: popupScaleIn 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+.restore-title { font-size: 1.2rem; font-weight: 800; color: var(--ink); margin-bottom: 12px; }
+.restore-desc { font-size: 0.9rem; color: var(--ink-2); line-height: 1.6; margin-bottom: 24px; }
+.restore-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-confirm-restore { background: var(--success); color: #fff; }
+.btn-cancel-restore { background: var(--muted); color: #fff; }
+
 @media (prefers-reduced-motion: reduce){
-  .result-popup-overlay, .result-popup-card{ animation:none !important; }
+  .result-popup-overlay, .result-popup-card, .restore-popup-overlay, .restore-popup-card{ animation:none !important; }
 }
 
 .lightbox-overlay{
@@ -546,9 +587,10 @@ input[type="text"]:focus, input[type="number"]:focus{
   .subtitle{ font-size:0.82rem; }
   
   .group-box{ padding:10px 6px; margin-bottom: 16px; width: calc(100% - 12px); margin-right: 6px; margin-left: 6px; }
-  .group-header { gap: 6px; margin-bottom: 12px; }
-  .group-title-input{ font-size:1.05rem; width:65%; }
-  .group-header .btn-danger { padding: 5px 8px; font-size: 0.72rem; }
+  .group-header { gap: 6px; margin-bottom: 12px; flex-direction: column; align-items: flex-start; }
+  .group-title-input{ font-size:1.05rem; width:100%; border-bottom:1px solid var(--gold); }
+  .group-actions-header { width: 100%; justify-content: space-between; margin-top: 4px; }
+  .group-header .btn-danger, .group-header .btn-reset-group { padding: 5px 8px; font-size: 0.72rem; margin: 0; }
   
   table { display: table !important; width: 100% !important; table-layout: fixed !important; }
   thead { display: table-header-group !important; }
@@ -628,9 +670,9 @@ input[type="text"]:focus, input[type="number"]:focus{
 
   <div class="hero">
     <div class="hero-crest">🎓</div>
-    <span class="hero-eyebrow"><span class="dot"></span> نظام LMD &middot; حساب وحدات ومجموعات</span>
+    <span class="hero-eyebrow"><span class="dot"></span> نظام LMD &middot; حفظ تلقائي آمن</span>
     <h1>حاسبة المعدل الجامعي</h1>
-    <p class="subtitle">احسب معدل كل وحدة تعليمية على حدة، ثم المعدل الفصلي العام بلمسة ذكية رشيقة.</p>
+    <p class="subtitle">احسب معدل كل وحدة تعليمية على حدة، مع ميزة حفظ علاماتك تلقائياً على جهازك دون فقدانها.</p>
     <div class="hero-rule"></div>
   </div>
 
@@ -685,6 +727,7 @@ input[type="text"]:focus, input[type="number"]:focus{
 
 </div>
 
+<!-- نافذة النتيجة المنبثقة -->
 <div class="result-popup-overlay" id="resultPopupOverlay">
   <div class="result-popup-card">
     <button class="result-popup-close" id="resultPopupClose" aria-label="إغلاق">✕</button>
@@ -699,6 +742,18 @@ input[type="text"]:focus, input[type="number"]:focus{
       <div class="seal-status" id="sealStatusPopup">قيد الحساب</div>
     </div>
     <div class="result-popup-caption" id="resultPopupCaption"></div>
+  </div>
+</div>
+
+<!-- نافذة تأكيد استرجاع البيانات المحفوظة -->
+<div class="restore-popup-overlay" id="restorePopupOverlay">
+  <div class="restore-popup-card">
+    <div class="restore-title">📂 استعادة علاماتك السابقة؟</div>
+    <div class="restore-desc">لقد عثرنا على علامات ومواد محفوظة من زيارتك السابقة على هذا الجهاز. هل تود استرجاعها وإكمال الكتابة عليها؟</div>
+    <div class="restore-btns">
+      <button class="btn btn-confirm-restore" onclick="confirmRestoreData()">نعم، استرجاع البيانات ✅</button>
+      <button class="btn btn-cancel-restore" onclick="rejectRestoreData()">لا، ابدأ من جديد ❌</button>
+    </div>
   </div>
 </div>
 
@@ -722,7 +777,10 @@ function addGroup() {
         <div class="group-box" id="group_${groupCount}">
             <div class="group-header">
                 <input type="text" class="group-title-input" value="المجموعة التعليمية ${groupCount}">
-                <button class="btn btn-danger" onclick="removeElement('group_${groupCount}')">حذف المجموعة ❌</button>
+                <div class="group-actions-header">
+                    <button class="btn btn-reset-group" onclick="resetGroupValues(${groupCount})">🔄 إعادة ضبط (مسح العلامات)</button>
+                    <button class="btn btn-danger" onclick="removeGroupAndSave('group_${groupCount}')">حذف المجموعة ❌</button>
+                </div>
             </div>
             <button class="btn btn-add" style="font-size:0.85rem; width: auto;" onclick="addSubject(${groupCount})">➕ إضافة مادة</button>
             <table>
@@ -747,6 +805,7 @@ function addGroup() {
     } else {
         addSubject(groupCount);
     }
+    return groupCount;
 }
 
 function addSubject(groupId) {
@@ -755,20 +814,31 @@ function addSubject(groupId) {
     
     const rowHtml = `
         <tr id="${rowId}" class="subject-row">
-            <td><input type="text" placeholder="اسم المادة" class="sub-name"></td>
-            <td><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1"></td>
-            <td><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20"></td>
+            <td><input type="text" placeholder="اسم المادة" class="sub-name" oninput="autoSaveAllData()"></td>
+            <td><input type="number" class="coeff" step="0.5" min="1" placeholder="1" value="1" oninput="autoSaveAllData()"></td>
+            <td><input type="number" class="exam" step="0.01" min="0" max="20" placeholder="0-20" oninput="autoSaveAllData()"></td>
             <td class="td-cell">
                 <button type="button" class="td-toggle-btn" onclick="enableTD(this)">➕ TD</button>
                 <div class="td-input-group">
-                    <input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="0-20">
+                    <input type="number" class="td-mark" step="0.01" min="0" max="20" placeholder="0-20" oninput="autoSaveAllData()">
                     <button type="button" class="td-remove-btn" onclick="disableTD(this)" title="حذف">🗑</button>
                 </div>
             </td>
-            <td><button class="btn btn-danger" onclick="removeElement('${rowId}')">🗑</button></td>
+            <td><button class="btn btn-danger" onclick="removeSubjectAndSave('${rowId}')">🗑</button></td>
         </tr>
     `;
     tbody.insertAdjacentHTML('beforeend', rowHtml);
+    return rowId;
+}
+
+function removeGroupAndSave(id) {
+    removeElement(id);
+    setTimeout(autoSaveAllData, 250);
+}
+
+function removeSubjectAndSave(id) {
+    removeElement(id);
+    setTimeout(autoSaveAllData, 250);
 }
 
 function removeElement(id) {
@@ -778,6 +848,17 @@ function removeElement(id) {
     el.style.opacity = '0';
     el.style.transform = 'translateX(8px)';
     setTimeout(() => el.remove(), 220);
+}
+
+function resetGroupValues(groupId) {
+    const groupBox = document.getElementById(`group_${groupId}`);
+    if (!groupBox) return;
+    groupBox.querySelectorAll('.subject-row').forEach(row => {
+        row.querySelector('.exam').value = '';
+        const tdMark = row.querySelector('.td-mark');
+        if (tdMark) tdMark.value = '';
+    });
+    autoSaveAllData();
 }
 
 let tdInfoShown = false;
@@ -792,6 +873,7 @@ function enableTD(btn) {
         tdInfoShown = true;
         showTdInfoToast();
     }
+    autoSaveAllData();
 }
 
 function disableTD(btn) {
@@ -800,6 +882,7 @@ function disableTD(btn) {
     group.style.display = 'none';
     cell.querySelector('.td-toggle-btn').style.display = 'inline-flex';
     group.querySelector('.td-mark').value = '';
+    autoSaveAllData();
 }
 
 function showTdInfoToast() {
@@ -932,6 +1015,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const overlay = document.getElementById('resultPopupOverlay');
     document.getElementById('resultPopupClose').addEventListener('click', closePopupAndStopAudio);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closePopupAndStopAudio(); });
+    
+    // التحقق من وجود بيانات سابقة ومحفوظة بالمستعرض
+    checkSavedDataOnLoad();
 });
 
 function openLightbox(src) {
@@ -1079,9 +1165,103 @@ function calculateSemesterGPA() {
         finalResultBox.style.display = 'block';
         caption.innerHTML = '';
     }
+    
+    autoSaveAllData();
 }
 
-window.onload = function () { addGroup(); };
+// دالة تجميع وحفظ البيانات بشكل نصي تلقائي في الـ localStorage
+function autoSaveAllData() {
+    const groupBoxes = document.querySelectorAll('.group-box');
+    const savedStructure = [];
+
+    groupBoxes.forEach(box => {
+        const gId = box.id.split('_')[1];
+        const groupTitle = box.querySelector('.group-title-input').value;
+        const subjects = [];
+
+        box.querySelectorAll('.subject-row').forEach(row => {
+            const tdGroup = row.querySelector('.td-input-group');
+            const tdActive = tdGroup && tdGroup.style.display === 'flex';
+            
+            subjects.push({
+                name: row.querySelector('.sub-name').value,
+                coeff: row.querySelector('.coeff').value,
+                exam: row.querySelector('.exam').value,
+                tdActive: tdActive,
+                tdMark: row.querySelector('.td-mark').value
+            });
+        });
+
+        savedStructure.push({
+            title: groupTitle,
+            subjects: subjects
+        });
+    });
+
+    localStorage.setItem('lmd_calculator_save', JSON.stringify(savedStructure));
+}
+
+// التحقق من وجود بيانات عند فتح الصفحة
+function checkSavedDataOnLoad() {
+    const data = localStorage.getItem('lmd_calculator_save');
+    if (data) {
+        // إذا وُجدت بيانات، لا نعرضها مباشرة بل نظهر صندوق الحوار الاختياري للمستخدم
+        document.getElementById('restorePopupOverlay').style.display = 'flex';
+    } else {
+        // إن لم توجد، نبني المجموعة الأولى العادية تلقائياً
+        addGroup();
+    }
+}
+
+// في حال وافق الطالب على استعادة البيانات
+function confirmRestoreData() {
+    document.getElementById('restorePopupOverlay').style.display = 'none';
+    const dataStr = localStorage.getItem('lmd_calculator_save');
+    if (!dataStr) return;
+
+    const savedStructure = JSON.parse(dataStr);
+    const container = document.getElementById('groupsContainer');
+    container.innerHTML = ''; // تصفير المحتوى الحالي تماماً لبناء القديم
+    groupCount = 0;
+
+    savedStructure.forEach(gData => {
+        const currentGId = addGroup();
+        const groupBox = document.getElementById(`group_${currentGId}`);
+        groupBox.querySelector('.group-title-input').value = gData.title;
+
+        // تفريغ الأسطر الافتراضية الثلاثة لتنزيل المحفوظة بدقة
+        const tbody = document.getElementById(`subject_body_${currentGId}`);
+        tbody.innerHTML = '';
+
+        gData.subjects.forEach(sData => {
+            const currentRowId = addSubject(currentGId);
+            const row = document.getElementById(currentRowId);
+            
+            row.querySelector('.sub-name').value = sData.name;
+            row.querySelector('.coeff').value = sData.coeff;
+            row.querySelector('.exam').value = sData.exam;
+
+            if (sData.tdActive) {
+                const btn = row.querySelector('.td-toggle-btn');
+                const group = row.querySelector('.td-input-group');
+                btn.style.display = 'none';
+                group.style.display = 'flex';
+                row.querySelector('.td-mark').value = sData.tdMark;
+            }
+        });
+    });
+}
+
+// في حال رفض الطالب الاسترجاع وبدأ من جديد
+function rejectRestoreData() {
+    document.getElementById('restorePopupOverlay').style.display = 'none';
+    localStorage.removeItem('lmd_calculator_save'); // مسح الحفظ القديم تماماً بطلب منه
+    addGroup(); // فتح جدول جديد فارغ
+}
+
+window.onload = function () {
+    // تم إلغاء addGroup التلقائي هنا ونقله للمراقبة بـ checkSavedDataOnLoad
+};
 </script>
 
 </body>
