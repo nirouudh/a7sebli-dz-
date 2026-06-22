@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>حاسبة المعدل الجامعي الذكية - نظام LMD</title>
 
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#6e1f2d">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+
 <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q[]).push(arguments)};
@@ -1322,5 +1327,14 @@ window.onload = function () {
 };
 </script>
 
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker registered:', reg.scope))
+      .catch(err => console.error('Service Worker registration failed:', err));
+  });
+}
+</script>
 </body>
 </html>
