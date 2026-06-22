@@ -7,7 +7,7 @@
 
 <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        c[a]=c[a]||function(){(c[a].q=c[a].q[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "xa5gs0hm51");
@@ -513,8 +513,31 @@ input[type="text"]:focus, input[type="number"]:focus{
 .btn-confirm-restore { background: var(--success); color: #fff; }
 .btn-cancel-restore { background: var(--muted); color: #fff; }
 
+/* نافذة تحميل التطبيق للهواتف */
+.app-popup-overlay {
+  position: fixed; inset: 0; z-index: 1300;
+  background: rgba(13,16,28,0.75);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.app-popup-card {
+  background: linear-gradient(165deg, var(--paper-2), var(--paper));
+  border: 2px solid var(--gold); border-radius: 16px;
+  padding: 35px 24px 26px; max-width: 360px; width: 100%; text-align: center;
+  box-shadow: 0 35px 80px rgba(0,0,0,0.6);
+  animation: popupScaleIn 0.4s cubic-bezier(.34,1.56,.64,1);
+  border: 1px solid var(--gold-light);
+}
+.app-title { font-size: 1.3rem; font-weight: 800; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.app-desc { font-size: 0.92rem; color: var(--ink-2); line-height: 1.7; margin-bottom: 22px; }
+.app-btns { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.btn-download-app { background: linear-gradient(135deg, var(--success), #275233); color: #fff; border: 1px solid rgba(255,255,255,0.2); width: 100% !important; justify-content: center; box-shadow: 0 6px 16px rgba(53,107,69,0.3); font-size: 1rem; padding: 12px; }
+.btn-download-app:hover { background: #275233; }
+.btn-skip-app { background: transparent; color: var(--muted); border: 1px solid var(--line); font-size: 0.82rem; padding: 6px; width: 100% !important; justify-content: center; margin: 4px 0 0 0 !important; }
+.btn-skip-app:hover { background: rgba(0,0,0,0.03); }
+
 @media (prefers-reduced-motion: reduce){
-  .result-popup-overlay, .result-popup-card, .restore-popup-overlay, .restore-popup-card{ animation:none !important; }
+  .result-popup-overlay, .result-popup-card, .restore-popup-overlay, .restore-popup-card, .app-popup-overlay, .app-popup-card{ animation:none !important; }
 }
 
 .lightbox-overlay{
@@ -625,7 +648,7 @@ input[type="text"]:focus, input[type="number"]:focus{
     height: 24px;
     padding: 0 !important;
     margin: 0 auto !important;
-    font-size: 0.7rem !important;
+    font-size: 0.7 shadow-color !important;
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -753,6 +776,18 @@ input[type="text"]:focus, input[type="number"]:focus{
     <div class="restore-btns">
       <button class="btn btn-confirm-restore" onclick="confirmRestoreData()">نعم، استرجاع البيانات ✅</button>
       <button class="btn btn-cancel-restore" onclick="rejectRestoreData()">لا، ابدأ من جديد ❌</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة تحميل التطبيق المنبثقة للهواتف الذكية -->
+<div class="app-popup-overlay" id="appPopupOverlay">
+  <div class="app-popup-card">
+    <div class="app-title">📱 أهلاً بك يا بطل!</div>
+    <div class="app-desc">لتجربة أسرع وأفضل، يمكنك تحميل تطبيقنا الرسمي الآن وحساب معدلاتك بحرية تامة <b>دون الحاجة للاتصال بالإنترنت (Offline)</b> في أي وقت ومن أي مكان!</div>
+    <div class="app-btns">
+      <button class="btn btn-download-app" onclick="triggerAppDownload()">📥 تحميل التطبيق الآن</button>
+      <button class="btn btn-skip-app" onclick="closeAppPopup()">لا، شكراً</button>
     </div>
   </div>
 </div>
@@ -1016,8 +1051,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('resultPopupClose').addEventListener('click', closePopupAndStopAudio);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closePopupAndStopAudio(); });
     
-    // التحقق من وجود بيانات سابقة ومحفوظة بالمستعرض
-    checkSavedDataOnLoad();
+    // التحقق من نوع الجهاز وعرض إشعار تحميل التطبيق وإدارة استعادة البيانات
+    initAppPopupsAndData();
 });
 
 function openLightbox(src) {
@@ -1201,14 +1236,38 @@ function autoSaveAllData() {
     localStorage.setItem('lmd_calculator_save', JSON.stringify(savedStructure));
 }
 
+// التحقق الموحد لنوافذ الترحيب والبيانات المحفوظة
+function initAppPopupsAndData() {
+    const isMobile = window.innerWidth <= 767 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const appNoticeDismissed = localStorage.getItem('lmd_app_notice_dismissed');
+
+    if (isMobile && !appNoticeDismissed) {
+        // إذا كان المستخدم من الهاتف ولم يغلق نافذة التطبيق سابقاً، تظهر أولاً
+        document.getElementById('appPopupOverlay').style.display = 'flex';
+    } else {
+        // إذا كان على الحاسوب أو أغلق نافذة التطبيق سابقاً، نتحقق مباشرة من البيانات المحفوظة
+        checkSavedDataOnLoad();
+    }
+}
+
+function closeAppPopup() {
+    document.getElementById('appPopupOverlay').style.display = 'none';
+    localStorage.setItem('lmd_app_notice_dismissed', 'true'); // تذكر خيار الإغلاق لمنع الإزعاج
+    checkSavedDataOnLoad(); // التحقق من علاماته بعد إغلاق ترحيب التطبيق
+}
+
+function triggerAppDownload() {
+    // هنا تضع رابط تحميل التطبيق الفعلي الخاص بك (مثلاً رابط متجر بلاي أو ملف apk مباشرة)
+    window.location.href = "app-release.apk"; 
+    closeAppPopup();
+}
+
 // التحقق من وجود بيانات عند فتح الصفحة
 function checkSavedDataOnLoad() {
     const data = localStorage.getItem('lmd_calculator_save');
     if (data) {
-        // إذا وُجدت بيانات، لا نعرضها مباشرة بل نظهر صندوق الحوار الاختياري للمستخدم
         document.getElementById('restorePopupOverlay').style.display = 'flex';
     } else {
-        // إن لم توجد، نبني المجموعة الأولى العادية تلقائياً
         addGroup();
     }
 }
@@ -1221,7 +1280,7 @@ function confirmRestoreData() {
 
     const savedStructure = JSON.parse(dataStr);
     const container = document.getElementById('groupsContainer');
-    container.innerHTML = ''; // تصفير المحتوى الحالي تماماً لبناء القديم
+    container.innerHTML = '';
     groupCount = 0;
 
     savedStructure.forEach(gData => {
@@ -1229,7 +1288,6 @@ function confirmRestoreData() {
         const groupBox = document.getElementById(`group_${currentGId}`);
         groupBox.querySelector('.group-title-input').value = gData.title;
 
-        // تفريغ الأسطر الافتراضية الثلاثة لتنزيل المحفوظة بدقة
         const tbody = document.getElementById(`subject_body_${currentGId}`);
         tbody.innerHTML = '';
 
@@ -1255,12 +1313,12 @@ function confirmRestoreData() {
 // في حال رفض الطالب الاسترجاع وبدأ من جديد
 function rejectRestoreData() {
     document.getElementById('restorePopupOverlay').style.display = 'none';
-    localStorage.removeItem('lmd_calculator_save'); // مسح الحفظ القديم تماماً بطلب منه
-    addGroup(); // فتح جدول جديد فارغ
+    localStorage.removeItem('lmd_calculator_save');
+    addGroup();
 }
 
 window.onload = function () {
-    // تم إلغاء addGroup التلقائي هنا ونقله للمراقبة بـ checkSavedDataOnLoad
+    // تم الإبقاء عليها فارغة والاعتماد على التوجيه المنظم بـ DOMContentLoaded لتفادي التداخل
 };
 </script>
 
