@@ -1,0 +1,16 @@
+{
+  "name": "حاسبة المعدل الجامعي الذكية",
+  "short_name": "حاسبة LMD",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#161b2e",
+  "theme_color": "#6e1f2d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
