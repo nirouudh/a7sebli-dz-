@@ -1,7 +1,10 @@
-const CACHE_NAME = 'lmd-calc-v1';
+const CACHE_NAME = 'lmd-calc-v2';
 const ASSETS = [
   './',
   './index.html',
+  './manifest.json',
+  './icon.png',
+  './icon_maskable.png',
   './knight_flowers_wind_loop.mp4',
   './guide.jpg',
   './reelsvideo.io_1781973559904.mp3',
@@ -14,6 +17,16 @@ self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
+    })
+  );
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
     })
   );
 });
