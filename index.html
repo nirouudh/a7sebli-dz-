@@ -797,6 +797,26 @@ input[type="text"]:focus, input[type="number"]:focus{
   </div>
 </div>
 
+<!-- زر عائم ثابت لتحميل/تثبيت التطبيق في أي وقت -->
+<button id="floatingInstallBtn" onclick="triggerAppDownload()" style="
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9998;
+  background: linear-gradient(135deg, #9A2D40, #161b2e);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+">📥 تثبيت التطبيق</button>
+
 <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
   <button class="lightbox-close" id="lightboxClose" aria-label="إغلاق" onclick="closeLightbox()">✕</button>
   <img id="lightboxImage" src="" alt="صورة مكبّرة" onclick="event.stopPropagation()">
@@ -1244,20 +1264,21 @@ function autoSaveAllData() {
 // التحقق الموحد لنوافذ الترحيب والبيانات المحفوظة
 function initAppPopupsAndData() {
     const isMobile = window.innerWidth <= 767 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const appNoticeDismissed = localStorage.getItem('lmd_app_notice_dismissed');
+    // sessionStorage يُمسح تلقائياً عند إغلاق التبويب/الموقع فعلياً، ولا يتأثر بتصغير المتصفح أو التنقل بين التطبيقات
+    const appNoticeDismissed = sessionStorage.getItem('lmd_app_notice_dismissed');
 
     if (isMobile && !appNoticeDismissed) {
-        // إذا كان المستخدم من الهاتف ولم يغلق نافذة التطبيق سابقاً، تظهر أولاً
+        // إذا كان المستخدم من الهاتف ولم يغلق نافذة التطبيق في هذه الجلسة، تظهر أولاً
         document.getElementById('appPopupOverlay').style.display = 'flex';
     } else {
-        // إذا كان على الحاسوب أو أغلق نافذة التطبيق سابقاً، نتحقق مباشرة من البيانات المحفوظة
+        // إذا كان على الحاسوب أو أغلق نافذة التطبيق سابقاً في هذه الجلسة، نتحقق مباشرة من البيانات المحفوظة
         checkSavedDataOnLoad();
     }
 }
 
 function closeAppPopup() {
     document.getElementById('appPopupOverlay').style.display = 'none';
-    localStorage.setItem('lmd_app_notice_dismissed', 'true'); // تذكر خيار الإغلاق لمنع الإزعاج
+    sessionStorage.setItem('lmd_app_notice_dismissed', 'true'); // تذكر خيار الإغلاق فقط لهذه الجلسة (حتى الخروج الفعلي من الموقع)
     checkSavedDataOnLoad(); // التحقق من علاماته بعد إغلاق ترحيب التطبيق
 }
 
@@ -1268,6 +1289,21 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); // نمنع ظهور إعلان المتصفح الافتراضي لنتحكم بتوقيته بنافذتنا الخاصة
     deferredInstallPrompt = e;
 });
+
+window.addEventListener('appinstalled', () => {
+    // التطبيق مثبت بالفعل، لا حاجة لإظهار الزر العائم بعد الآن
+    const btn = document.getElementById('floatingInstallBtn');
+    if (btn) btn.style.display = 'none';
+    deferredInstallPrompt = null;
+});
+
+// إن كان المتصفح يفتح الموقع من داخل التطبيق المثبت (PWA) أصلاً، نخفي الزر فوراً
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    window.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('floatingInstallBtn');
+        if (btn) btn.style.display = 'none';
+    });
+}
 
 function triggerAppDownload() {
     if (deferredInstallPrompt) {
@@ -1355,4 +1391,3 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
-
