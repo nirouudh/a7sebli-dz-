@@ -1261,9 +1261,25 @@ function closeAppPopup() {
     checkSavedDataOnLoad(); // التحقق من علاماته بعد إغلاق ترحيب التطبيق
 }
 
+// يخزّن حدث التثبيت الذي يرسله المتصفح تلقائياً عند توفر إمكانية تثبيت PWA
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); // نمنع ظهور إعلان المتصفح الافتراضي لنتحكم بتوقيته بنافذتنا الخاصة
+    deferredInstallPrompt = e;
+});
+
 function triggerAppDownload() {
-    // هنا تضع رابط تحميل التطبيق الفعلي الخاص بك (مثلاً رابط متجر بلاي أو ملف apk مباشرة)
-    window.location.href = "app-release.apk"; 
+    if (deferredInstallPrompt) {
+        // المتصفح يدعم التثبيت ولدينا حدث جاهز -> نعرض نافذة التثبيت الحقيقية
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then(() => {
+            deferredInstallPrompt = null;
+        });
+    } else {
+        // التطبيق مثبت بالفعل، أو المتصفح لا يدعم التثبيت التلقائي (مثل Safari/iOS)
+        alert('لإضافة التطبيق للشاشة الرئيسية:\nمن قائمة المتصفح (⋮ أو زر المشاركة)، اختر "إضافة إلى الشاشة الرئيسية".');
+    }
     closeAppPopup();
 }
 
@@ -1336,5 +1352,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
 </body>
 </html>
+
